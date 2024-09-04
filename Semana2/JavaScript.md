@@ -383,7 +383,7 @@ const nombreFuncion = (parametros) => {
 };
 ```
 
-Si la función tiene solo un parámetro, puedes omitir los paréntesis, y si el cuerpo de la función tiene una sola expresión, puedes omitir las llaves `{}` y la palabra clave `return`.
+Si la función tiene solo un parámetro, puedes omitir los paréntesis, y si el cuerpo de la función tiene una sola expresión, puedes omitir las llaves `{}` y la palabra clave `return`. En este caso, el resultado de la expresión se devuelve automáticamente.
 
 ```javascript
 const traditional = function (x) {
@@ -411,9 +411,14 @@ console.log(greet()); // Imprime: Hello, world!
 
 Cuando una función flecha no tiene parámetros, los paréntesis vacíos `()` son obligatorios. En este caso, la función `greet` devuelve una cadena fija "Hello, world!".
 
----
+```javascript
+//Funciones arrow y callbaks.
+const numbers = [1, 2, 3, 4, 5];
 
-### **Funciones flechas y callbacks**
+const doubled = numbers.map(n => n * 2);
+
+console.log(doubled); // Imprime: [2, 4, 6, 8, 10]
+```
 
 Las funciones flecha son especialmente útiles como *callbacks*, donde se necesita pasar una función como argumento a otra función.
 
@@ -470,9 +475,43 @@ console.log(scopeOf.arrow()); // Imprime: "alcance léxico"
 - **Función tradicional (❸)**: La función `traditional` es una función regular. Cuando `scopeOf.traditional()` es llamada, `this` se refiere al objeto `scopeOf`, por lo que devuelve "alcance definidor".
 - **Función flecha**: La función `arrow` es una función flecha. Cuando se ejecuta `scopeOf.arrow()`, `this` no se refiere al objeto `scopeOf`, sino al contexto léxico global, devolviendo "alcance léxico".
 
+**Conceptos clave:**
+
+- Alcance léxico: En funciones flecha, `this` es determinado por el lugar donde se define la función, no donde se invoca. Esto significa que `this` en una función flecha siempre se refiere al mismo valor que en el contexto en que la función fue definida.
+- Alcance definidor: En funciones tradicionales, `this` es dinámico y se refiere al objeto que llama a la función. Si llamas a la función desde un objeto, `this` apunta a ese objeto.
+
+```javascript
+function Timer() {
+    this.seconds = 0;
+
+    setInterval(function() {
+        this.seconds++;
+        console.log(this.seconds); // `this` aquí se refiere al objeto global o a `undefined` en modo estricto
+    }, 1000);
+}
+
+const timer = new Timer(); // Esto no funciona como se espera
+
+```
+En este ejemplo, `this` dentro de la función pasada a `setInterval` se refiere al objeto global (window en navegadores) en lugar de al objeto `Timer`, lo que puede causar errores inesperados.
+
+Para solucionar esto, puedes usar una función flecha:
+
+```javascript
+function Timer() {
+    this.seconds = 0;
+
+    setInterval(() => {
+        this.seconds++;
+        console.log(this.seconds); // `this` aquí se refiere al objeto `Timer`
+    }, 1000);
+}
+
+const timer = new Timer(); // Esto funciona correctamente
+```
 ---
 
-### **Funciones como ciudadanos de primera clase**
+#### **Funciones como ciudadanos de primera clase**
 
 En JavaScript, las funciones son tratadas como ciudadanos de primera clase, lo que significa que pueden ser asignadas a variables, pasadas como argumentos a otras funciones, y devueltas por funciones.
 
@@ -548,18 +587,40 @@ console.log(result);
 
 Utilizamos `reduce` para construir la cadena final. Por cada parte de la cadena en `strings`, se añade el correspondiente valor interpolado de `values`, si existe.
 
----
-
-### **Funciones flecha y callbacks**
-
 ```javascript
-const numbers = [1, 2, 3, 4, 5];
-const doubled = numbers.map(n => n * 2);
-console.log(doubled); // Imprime: [2, 4, 6, 8, 10]
+function upperCaseTag(strings, ...values) { 
+    // Convierte cada cadena a mayúsculas 
+    let result = strings.map(str => str.toUpperCase()); 
+    // Concatena el literal de plantilla con los valores interpolados 
+    return result.reduce((acc, str, i) => acc + str + (values[i] || ''), '');
+} 
+
+let name = "Kapu"; 
+let city = "Wonderland"; 
+
+let message = upperCaseTag`Hello, ${name} from ${city}!`; 
+
+console.log(message);
 ```
 
-Las funciones flecha son especialmente útiles cuando se pasan como *callbacks*. Aquí, la función flecha multiplica cada número del arreglo por 2, y el resultado se guarda en un nuevo arreglo.
+```javascript
+function formatCurrency(strings, ...values) { 
+    // Convierte valores numéricos a formato de moneda 
+    return strings.reduce((result, string, i) => { 
+        let value = values[i]; 
+        if (typeof value === 'number') { 
+            value = `$${value.toFixed(2)}`; 
+        } 
+        return result + string + (value || ''); 
+    }, ''); 
+} 
 
+let price = 25.99; 
+let discount = 5; 
+
+let receipt = formatCurrency`El precio total es ${price} con un descuento de ${discount}.`; 
+console.log(receipt);
+```
 ---
 ### **Programación asincrónica en JavaScript**
 
@@ -567,7 +628,24 @@ Las funciones flecha son especialmente útiles cuando se pasan como *callbacks*.
 
 Las tareas no bloqueantes son operaciones que pueden iniciarse y, en lugar de esperar a que se completen, permiten que el programa continúe ejecutando otras operaciones. Una vez que la tarea no bloqueante está completa, el programa vuelve a procesar su resultado. Este enfoque es clave en la programación asincrónica en JavaScript.
 
-Cuando ejecutas un script en JavaScript, cada línea de código se ejecuta secuencialmente. Sin embargo, si una tarea tarda mucho tiempo (como una solicitud de red o una lectura de archivo), esto podría bloquear el hilo principal. Para evitarlo, JavaScript permite que ciertas operaciones se realicen de manera asincrónica, liberando el hilo principal para que continúe con otras tareas.
+Cuando ejecutas un script en JavaScript, cada línea de código se ejecuta secuencialmente. Sin embargo, si una tarea tarda mucho tiempo (como una solicitud de red o una lectura de archivo), esto podría bloquear el hilo principal, haciendo que tu aplicación no responda. Para evitarlo, JavaScript permite que ciertas operaciones se realicen de manera asincrónica, liberando el hilo principal para que continúe con otras tareas mientras se espera el resultado.
+
+```javascript
+console.log("Inicio de la solicitud"); 
+
+fetch("https://api.example.com/data") 
+
+    .then(response => response.json()) 
+
+    .then(data => { 
+
+        console.log("Datos recibidos:", data); 
+
+    }); 
+
+console.log("Solicitud enviada, esperando respuesta..."); 
+```
+El error que estás viendo (ENOTFOUND api.example.com) indica que la dirección api.example.com no se pudo resolver porque no es un dominio válido o accesible desde tu entorno. La función fetch intenta hacer una solicitud HTTP a ese dominio, pero no puede encontrarlo.
 
 ```javascript
 console.log("Inicio de la solicitud");
@@ -586,6 +664,58 @@ En este ejemplo:
 1. **Inicio de la solicitud**: Se imprime inmediatamente.
 2. **Solicitud enviada, esperando respuesta...**: También se imprime de inmediato, sin esperar a que se complete la solicitud de la API.
 3. **Datos recibidos**: Este mensaje se imprime solo después de que los datos se han recibido y procesado.
+
+```javascript
+console.log("Inicio"); 
+
+setTimeout(() => { 
+
+    console.log("Esta tarea se ejecuta después de 2 segundos"); 
+
+}, 2000); 
+
+console.log("Fin"); 
+```
+En este ejemplo: 
+
+- `Inicio` y `Fin` se imprimen inmediatamente. 
+- La tarea dentro de `setTimeout` se ejecuta después de 2 segundos, permitiendo que el hilo principal continúe ejecutando otras operaciones mientras espera.
+
+```javascript
+console.log("Iniciando el intervalo"); 
+let counter = 0;
+
+function executeInterval() {
+    counter++;
+    console.log(`Intervalo ejecutado: ${counter}`);
+    if (counter < 5) {
+        setTimeout(executeInterval, 1000); // Llama a sí mismo después de 1 segundo
+    }
+}
+
+setTimeout(executeInterval, 1000); // Comienza el "intervalo" después de 1 segundo
+console.log("Intervalo configurado");
+
+// Output: 
+
+// Iniciando el intervalo 
+
+// Intervalo configurado 
+
+// Intervalo ejecutado: 1 
+
+// Intervalo ejecutado: 2 
+
+// Intervalo ejecutado: 3 
+
+// Intervalo ejecutado: 4 
+
+// Intervalo ejecutado: 5 
+```
+En este ejemplo: 
+
+- El intervalo se configura y ejecuta cada segundo. 
+- Mientras tanto, otras operaciones (como console.log("Intervalo configurado");) continúan ejecutándose sin esperar a que el intervalo termine.
 
 ---
 
