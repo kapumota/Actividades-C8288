@@ -721,7 +721,11 @@ En este ejemplo:
 
 ### **Callbacks**
 
-En JavaScript, un *callback* es una función que se pasa como argumento a otra función y que se ejecuta después de que se completa alguna operación.
+En JavaScript, un *callback* es una función que se pasa como argumento a otra función y que se ejecuta después de que se completa alguna operación dentro de la función en la que fue pasada. 
+
+Cuando JavaScript necesita realizar una tarea que podría tardar un tiempo en completarse (como leer un archivo, realizar una solicitud HTTP, o establecer un temporizador), puede usar un callback para indicar qué hacer una vez que se complete la tarea. 
+
+En lugar de esperar a que la tarea termine (lo que bloquearía el hilo principal), JavaScript sigue ejecutando otras tareas y, una vez que la operación asincrónica está completa, ejecuta la función callback.
 
 ```javascript
 function getData(callback) { 
@@ -811,13 +815,65 @@ doSomething(function(result) {
 });
 ```
 
+```javascript
+
+function doSomething(callback) {
+    callback("Resultado de doSomething");
+}
+
+function doSomethingElse(result, callback) {
+    callback(result + " -> Resultado de doSomethingElse");
+}
+
+function doAnotherThing(result, callback) {
+    callback(result + " -> Resultado de doAnotherThing");
+}
+
+function doFinalThing(result, callback) {
+    callback(result + " -> Resultado de doFinalThing");
+}
+
+function doSomethingMore(callback) {
+    callback("Resultado de doSomethingMore");
+}
+
+function doEvenMore(result, callback) {
+    callback(result + " -> Resultado de doEvenMore");
+}
+
+function finishItOff(result, callback) {
+    callback(result + " -> Todo completado");
+}
+
+doSomething(function(result) {
+    doSomethingElse(result, function(newResult) {
+        doAnotherThing(newResult, function(finalResult) {
+            doFinalThing(finalResult, function() {
+                console.log("Primera parte completada");
+                
+                doSomethingMore(function(extraResult) {
+                    doEvenMore(extraResult, function(evenMoreResult) {
+                        finishItOff(evenMoreResult, function() {
+                            console.log("Todo completado finalmente");
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+```
+
+
 Este tipo de código es difícil de mantener debido a la profundidad de los *callbacks* anidados. Afortunadamente, las **Promesas** y **async/await** son soluciones más elegantes para manejar este tipo de situaciones.
 
 ---
 
 ### **Promesas**
 
-Las promesas en JavaScript son un mecanismo para manejar operaciones asincrónicas de manera más limpia y manejable que con los *callbacks* tradicionales. Una promesa representa un valor que puede estar disponible ahora, en el futuro, o nunca.
+Las promesas en JavaScript son un mecanismo para manejar operaciones asincrónicas de manera más limpia y manejable que con los *callbacks* tradicionales. Una promesa representa un valor que puede estar disponible ahora, en el futuro, o nunca , y proporciona una forma de encadenar acciones que dependen del resultado de esa operación asincrónica.
+
 
 #### Estados de una promesa:
 
@@ -858,7 +914,7 @@ ejemploPromesa()
 
 **Explicación**:
 
-1. Se crea una nueva promesa que simula una operación que puede tener éxito o fallar.
+1. `new Promise`: Se crea una nueva promesa que simula una operación que puede tener éxito o fallar.
 2. `resolve`: Llama a esta función si la operación tiene éxito.
 3. `reject`: Llama a esta función si la operación falla.
 4. Se utilizan `.then()`, `.catch()` y `.finally()` para manejar los diferentes resultados de la promesa.
@@ -898,11 +954,119 @@ fetchData("https://jsonplaceholder.typicode.com/posts/1");
 4. `.catch()`: Captura cualquier error ocurrido durante la operación.
 5. `.finally()`: Siempre se ejecuta, independientemente de si la promesa se resolvió o se rechazó, y se utiliza para realizar tareas de limpieza.
 
+Recuerda: una vez que tienes una promesa, puedes manejar su resultado o error utilizando los métodos then y catch.
+
+* then: Se utiliza para manejar el caso en que la promesa se resuelve (cumple).
+* catch: Se utiliza para manejar el caso en que la promesa se rechaza (falla).
+
+```javascript
+promise
+    .then(result => {
+        console.log(result); // Se ejecuta si la promesa se resuelve
+    })
+    .catch(error => {
+        console.error(error); // Se ejecuta si la promesa se rechaza
+    });
+
+```
+
+```javascript
+function fetchData() {
+    return new Promise((resolve, reject) => {
+        console.log("Iniciando solicitud de datos...");
+
+        setTimeout(() => {
+            let success = true; // Simula éxito o fracaso
+            if (success) {
+                resolve({ id: 1, name: "Producto" });
+            } else {
+                reject("Error: No se pudo obtener los datos.");
+            }
+        }, 2000);
+    });
+}
+
+fetchData()
+    .then(data => {
+        console.log("Datos recibidos:", data);
+        // Puedes retornar otra promesa para encadenar más .then()
+        return "Proceso adicional con los datos";
+    })
+    .then(message => {
+        console.log(message);
+    })
+    .catch(error => {
+        console.error(error);
+    });
+```
+- `fetchData` es una función que retorna una promesa.
+- Dentro de la promesa, simulamos una operación asincrónica (como una solicitud de red) con `setTimeout`.
+- Si la operación es exitosa, llamamos a resolve con los datos recibidos.
+- Si ocurre un error, llamamos a reject con un mensaje de error.
+- En la cadena de then, manejamos los datos recibidos y podemos encadenar más operaciones si es necesario.
+- Si ocurre un error, catch manejará ese error.
+
+```javascript
+function primerPaso() {
+    return new Promise((resolve) => {
+        console.log("Primer paso completado");
+        resolve("Datos del primer paso");
+    });
+}
+
+function segundoPaso(data) {
+    return new Promise((resolve) => {
+        console.log("Segundo paso completado con:", data);
+        resolve("Datos del segundo paso");
+    });
+}
+
+function tercerPaso(data) {
+    return new Promise((resolve) => {
+        console.log("Tercer paso completado con:", data);
+        resolve("Datos del tercer paso");
+    });
+}
+
+primerPaso()
+    .then(result => segundoPaso(result))
+    .then(result => tercerPaso(result))
+    .then(result => {
+        console.log("Todos los pasos completados con:", result);
+    })
+    .catch(error => {
+        console.error("Ocurrió un error:", error);
+    });
+
+```
+
+- `primerPaso`, `segundoPaso` y `tercerPaso` son funciones que retornan promesas.
+- Las promesas se encadenan usando `then` para manejar los resultados de cada operación sucesiva.
+- catch maneja cualquier error que pueda ocurrir en cualquier parte de la cadena.
+
+**Promesas y asincronia en paralelo**
+```javascript
+let promise1 = new Promise((resolve) => setTimeout(() => resolve("Primera promesa"), 1000));
+let promise2 = new Promise((resolve) => setTimeout(() => resolve("Segunda promesa"), 2000));
+let promise3 = new Promise((resolve) => setTimeout(() => resolve("Tercera promesa"), 3000));
+
+Promise.all([promise1, promise2, promise3])
+    .then(results => {
+        console.log("Todas las promesas completadas:", results);
+    })
+    .catch(error => {
+        console.error("Ocurrió un error en alguna promesa:", error);
+    });
+```
+- `Promise.all` toma un arreglo de promesas y retorna una nueva promesa que se resuelve cuando todas las promesas en el arreglo se han completado.
+- El valor resultante es un arreglo con los resultados de cada promesa en el mismo orden en que fueron proporcionadas.
 ---
 
 ### **async/await**
 
 `async/await` es una sintaxis más clara y directa para manejar promesas. Permite escribir código asincrónico que se asemeja al código síncrono.
+
+Supongamos que queremos simular la obtención de datos de un servidor:
 
 ```javascript
 function getData() {
@@ -926,6 +1090,8 @@ fetchData();
 - `async` marca una función como asincrónica.
 - `await` pausa la ejecución de la función hasta que la promesa se resuelve.
 
+El código se ejecuta de manera que parece síncrono, aunque en realidad no lo es, lo que hace que sea más fácil de leer y entender.
+
 Con `async/await`, puedes manejar errores usando `try/catch`:
 
 ```javascript
@@ -940,10 +1106,21 @@ async function fetchData() {
         console.log("Solicitud completada."); // Siempre se ejecuta
     }
 }
+fetchData();
+// Output (puede variar):
+// Iniciando solicitud...
+// (2 segundos después, si se resuelve)
+// Datos recibidos
+// Solicitud completada.
+// OR
+// Iniciando solicitud...
+// (2 segundos después, si falla)
+// Error al obtener los datos
+// Solicitud completada.
 ```
 ---
 
-### **Encadenamiento de `async/await`**
+#### **Encadenamiento de `async/await`**
 
 Con `async/await`, puedes encadenar varias promesas de una manera más sencilla y clara. En lugar de utilizar múltiples `.then()`, puedes esperar a que cada promesa se resuelva antes de pasar al siguiente paso.
 
@@ -966,13 +1143,18 @@ async function processData() {
 }
 
 processData();
+// Output (puede variar):
+// Paso 1: Resultado del primer paso
+// Paso 2: Resultado del segundo paso
+// Paso 3: Resultado del tercer paso
+// Todos los pasos completados.
 ```
 
 En este ejemplo, cada paso depende del resultado del paso anterior. Si alguna promesa falla, el bloque `catch` manejará el error.
 
 ---
 
-### **Paralelismo con `async/await` y `Promise.all`**
+#### **Paralelismo con `async/await` y `Promise.all`**
 
 Si tienes varias promesas independientes entre sí, puedes ejecutarlas en paralelo utilizando `Promise.all`. Esto puede hacer que tu código sea más eficiente, ya que no necesitas esperar a que una promesa se resuelva antes de iniciar otra.
 
@@ -991,6 +1173,9 @@ async function fetchMultipleData() {
 }
 
 fetchMultipleData();
+// Output (puede variar):
+// Datos 1: Resultado de la primera solicitud
+// Datos 2: Resultado de la segunda solicitud
 ```
 
 - `Promise.all` toma un arreglo de promesas y espera a que todas se resuelvan. Si alguna falla, se ejecutará el bloque `catch`.
@@ -1029,102 +1214,3 @@ console.log(`Arreglo original: ${originalArray}, Arreglo clonado: ${clonedArray}
 ```
 
 El operador de propagación se utiliza para clonar el arreglo `originalArray`. Los cambios realizados en `clonedArray` no afectan al arreglo original.
-
----
-
-### **Promesas y asincronía en paralelo**
-
-Usar `Promise.all` es una forma eficiente de manejar promesas en paralelo. Esto es útil cuando tienes múltiples operaciones que no dependen entre sí.
-
-```javascript
-let promise1 = new Promise((resolve) => setTimeout(() => resolve("Primera promesa"), 1000));
-let promise2 = new Promise((resolve) => setTimeout(() => resolve("Segunda promesa"), 2000));
-let promise3 = new Promise((resolve) => setTimeout(() => resolve("Tercera promesa"), 3000));
-
-Promise.all([promise1, promise2, promise3])
-    .then(results => {
-        console.log("Todas las promesas completadas:", results);
-    })
-    .catch(error => {
-        console.error("Ocurrió un error en alguna promesa:", error);
-    });
-```
-
-- `Promise.all` ejecuta todas las promesas en paralelo y se resuelve cuando todas se completan. Si alguna falla, el bloque `catch` maneja el error.
-- El valor devuelto por `Promise.all` es un arreglo con los resultados de cada promesa, en el mismo orden en que fueron proporcionadas.
-
----
-
-### **Hoisting (Izado) en JavaScript**
-
-El izado (`hoisting`) es un comportamiento de JavaScript donde las declaraciones de variables y funciones se "mueven" al comienzo del alcance antes de la ejecución del código. Esto significa que puedes usar variables y funciones antes de que aparezcan en el código, aunque el valor de las variables declaradas con `var` será `undefined` hasta que se les asigne un valor.
-
-#### Variables declaradas con `var`:
-
-```javascript
-console.log(a); // undefined
-var a = 5;
-```
-
-Lo que sucede internamente es que la declaración de `var a` se mueve al comienzo del código, pero su valor aún no está asignado:
-
-```javascript
-var a;
-console.log(a); // undefined
-a = 5;
-```
-
-Las variables declaradas con `let` o `const` no se comportan de esta manera debido a la **zona muerta temporal** (TDZ, *Temporal Dead Zone*), lo que genera un error si intentas usarlas antes de su declaración:
-
-```javascript
-console.log(b); // Error: Cannot access 'b' before initialization
-let b = 10;
-```
-
----
-
-### **Ejemplo de temporización asincrónica**
-
-La función `setTimeout` es muy utilizada en JavaScript para ejecutar código después de un retraso.
-
-```javascript
-console.log("Inicio");
-
-setTimeout(() => {
-    console.log("Esta tarea se ejecuta después de 2 segundos");
-}, 2000);
-
-console.log("Fin");
-```
-
-1. "Inicio" y "Fin" se imprimen inmediatamente.
-2. La tarea dentro de `setTimeout` se ejecuta después de 2 segundos.
-
-#### Temporización con auto-llamada:
-
-Puedes crear una especie de intervalo usando `setTimeout` y una función que se llama a sí misma:
-
-```javascript
-console.log("Iniciando el intervalo");
-let counter = 0;
-
-function executeInterval() {
-    counter++;
-    console.log(`Intervalo ejecutado: ${counter}`);
-    if (counter < 5) {
-        setTimeout(executeInterval, 1000); // Se llama a sí misma después de 1 segundo
-    }
-}
-
-setTimeout(executeInterval, 1000); // Comienza el "intervalo" después de 1 segundo
-console.log("Intervalo configurado");
-```
-
-El intervalo se ejecuta cada segundo y se detiene después de 5 iteraciones.
-
----
-
-### **Conclusión de Promesas y asincronía**
-
-El uso de promesas y la sintaxis `async/await` simplifican la programación asincrónica en JavaScript, eliminando el problema del "infierno de callbacks" y haciendo el código más fácil de leer y mantener. Además, técnicas como `Promise.all` permiten el manejo eficiente de múltiples promesas en paralelo.
-
