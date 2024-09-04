@@ -2,7 +2,7 @@
 
 Para ejecutar este cuaderno de ejemplo, puedes revisar: [Notebooks for Python and Javascript](https://codestax.medium.com/notebooks-for-python-and-javascript-aefbb5040428), está hecho con el objetivo de presentar el código fuente realizado y algunas anotaciones de temas complejos.
 
-### **Exportaciones predeterminadas**
+#### **Exportaciones predeterminadas**
 
 ```javascript
 const getFoo = function () {  
@@ -22,7 +22,7 @@ const obtenerManzana = function () {
 export default obtenerManzana; 
 ```
 
-### **Exportaciones nombradas**
+#### **Exportaciones nombradas**
 
 ```javascript
 export const getFooBar = function () {  
@@ -372,7 +372,7 @@ console.log(obj); // Imprime: { name: "Mota" }
 
 ---
 
-### **Funciones flechas**
+#### **Funciones flechas**
 
 Las funciones flecha, introducidas en ECMAScript 6 (ES6), son una forma más concisa de escribir funciones en JavaScript. Son especialmente útiles cuando se quieren definir funciones de manera rápida y en situaciones donde se utilizan como callbacks o funciones anónimas.
 
@@ -432,7 +432,7 @@ En este ejemplo, la función flecha `n => n * 2` se pasa como *callback* al mét
 
 ---
 
-### **Alcance léxico**
+#### **Alcance léxico**
 
 Una de las características más importantes de las funciones flecha es su manejo del contexto `this`. A diferencia de las funciones tradicionales, las funciones flecha no tienen su propio `this`. En su lugar, heredan el `this` del contexto en el que fueron definidas, lo que las hace más predecibles en situaciones donde se usan como *callbacks*.
 
@@ -475,7 +475,7 @@ console.log(scopeOf.arrow()); // Imprime: "alcance léxico"
 - **Función tradicional (❸)**: La función `traditional` es una función regular. Cuando `scopeOf.traditional()` es llamada, `this` se refiere al objeto `scopeOf`, por lo que devuelve "alcance definidor".
 - **Función flecha**: La función `arrow` es una función flecha. Cuando se ejecuta `scopeOf.arrow()`, `this` no se refiere al objeto `scopeOf`, sino al contexto léxico global, devolviendo "alcance léxico".
 
-**Conceptos clave:**
+**Conceptos claves:**
 
 - Alcance léxico: En funciones flecha, `this` es determinado por el lugar donde se define la función, no donde se invoca. Esto significa que `this` en una función flecha siempre se refiere al mismo valor que en el contexto en que la función fue definida.
 - Alcance definidor: En funciones tradicionales, `this` es dinámico y se refiere al objeto que llama a la función. Si llamas a la función desde un objeto, `this` apunta a ese objeto.
@@ -661,9 +661,9 @@ console.log("Solicitud enviada, esperando respuesta...");
 
 En este ejemplo:
 
-1. **Inicio de la solicitud**: Se imprime inmediatamente.
-2. **Solicitud enviada, esperando respuesta...**: También se imprime de inmediato, sin esperar a que se complete la solicitud de la API.
-3. **Datos recibidos**: Este mensaje se imprime solo después de que los datos se han recibido y procesado.
+1. Inicio de la solicitud: Se imprime inmediatamente.
+2. Solicitud enviada, esperando respuesta...: También se imprime de inmediato, sin esperar a que se complete la solicitud de la API.
+3. Datos recibidos: Este mensaje se imprime solo después de que los datos se han recibido y procesado.
 
 ```javascript
 console.log("Inicio"); 
@@ -719,7 +719,7 @@ En este ejemplo:
 
 ---
 
-### **Callbacks**
+#### **Callbacks**
 
 En JavaScript, un *callback* es una función que se pasa como argumento a otra función y que se ejecuta después de que se completa alguna operación dentro de la función en la que fue pasada. 
 
@@ -753,7 +753,7 @@ getData(processData);
 
 ---
 
-### **Callback anidado**
+#### **Callback anidado**
 
 ```javascript
 function primeraTarea(callback) { 
@@ -792,7 +792,7 @@ primeraTarea((data1) => {
 
 ---
 
-### **Infierno de callbacks**
+#### **Infierno de callbacks**
 
 El código con *callbacks* anidados puede volverse difícil de leer y mantener, creando lo que se conoce como el "infierno de *callbacks*":
 
@@ -870,12 +870,12 @@ Este tipo de código es difícil de mantener debido a la profundidad de los *cal
 
 ---
 
-### **Promesas**
+#### **Promesas**
 
 Las promesas en JavaScript son un mecanismo para manejar operaciones asincrónicas de manera más limpia y manejable que con los *callbacks* tradicionales. Una promesa representa un valor que puede estar disponible ahora, en el futuro, o nunca , y proporciona una forma de encadenar acciones que dependen del resultado de esa operación asincrónica.
 
 
-#### Estados de una promesa:
+##### Estados de una promesa:
 
 - **Pendiente (Pending)**: La promesa se ha iniciado, pero aún no ha terminado.
 - **Cumplida (Fulfilled)**: La operación se completó con éxito, y la promesa devuelve un valor.
@@ -921,7 +921,7 @@ ejemploPromesa()
 
 ---
 
-### **Promesas y fetch**
+#### **Promesas y fetch**
 
 Un ejemplo práctico de **promesas** es usando la API `fetch` para obtener datos de una URL.
 
@@ -1062,7 +1062,7 @@ Promise.all([promise1, promise2, promise3])
 - El valor resultante es un arreglo con los resultados de cada promesa en el mismo orden en que fueron proporcionadas.
 ---
 
-### **async/await**
+#### **async/await**
 
 `async/await` es una sintaxis más clara y directa para manejar promesas. Permite escribir código asincrónico que se asemeja al código síncrono.
 
