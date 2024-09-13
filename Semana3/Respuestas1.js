@@ -1,5 +1,222 @@
 // Pregunta 1
 
+/**
+ * Clase que representa un Gestor de Tareas.
+ */
+class GestorTareas {
+    constructor() {
+        this.tareas = {}; // Estructura: { categoria: { subcategoria: [tareas] } }
+    }
+
+    // Agrega una nueva tarea a una categoría y subcategoría.
+    agregarTarea(categoria, subCategoria, tarea) {
+        if (!this.tareas[categoria]) {
+            this.tareas[categoria] = {};
+        }
+        if (!this.tareas[categoria][subCategoria]) {
+            this.tareas[categoria][subCategoria] = [];
+        }
+        this.tareas[categoria][subCategoria].push(tarea);
+    }
+
+    // Elimina una tarea específica de una categoría y subcategoría.
+    eliminarTarea(categoria, subCategoria, nombreTarea) {
+        const tareasSubCat = this.tareas[categoria]?.[subCategoria];
+        if (tareasSubCat) {
+            this.tareas[categoria][subCategoria] = tareasSubCat.filter(tarea => tarea.nombre !== nombreTarea);
+        }
+    }
+
+    // Actualiza el estado de una tarea específica.
+    actualizarEstadoTarea(categoria, subCategoria, nombreTarea, nuevoEstado) {
+        const tareasSubCat = this.tareas[categoria]?.[subCategoria];
+        if (tareasSubCat) {
+            const tarea = tareasSubCat.find(tarea => tarea.nombre === nombreTarea);
+            if (tarea) {
+                tarea.completada = nuevoEstado;
+            }
+        }
+    }
+
+    // Fusiona dos categorías, combinando las subcategorías y tareas.
+    fusionarCategorias(categoria1, categoria2, nuevoNombreCategoria) {
+        const categoriaFusionada = {
+            ...this.tareas[categoria1],
+            ...this.tareas[categoria2],
+        };
+
+        // Si una subcategoría existe en ambas categorías, se combinan las tareas
+        for (let subCategoria in categoriaFusionada) {
+            if (this.tareas[categoria1]?.[subCategoria] && this.tareas[categoria2]?.[subCategoria]) {
+                categoriaFusionada[subCategoria] = [
+                    ...this.tareas[categoria1][subCategoria],
+                    ...this.tareas[categoria2][subCategoria],
+                ];
+            }
+        }
+
+        this.tareas[nuevoNombreCategoria] = categoriaFusionada;
+        delete this.tareas[categoria1];
+        delete this.tareas[categoria2];
+    }
+
+    // Itera sobre todas las categorías y subcategorías, imprimiendo las tareas.
+    listarTareas() {
+        for (let categoria in this.tareas) {
+            console.log(`Categoría: ${categoria}`);
+            for (let subCategoria in this.tareas[categoria]) {
+                console.log(`  Subcategoría: ${subCategoria}`);
+                this.tareas[categoria][subCategoria].forEach(tarea => {
+                    console.log(`    - Tarea: ${tarea.nombre} [${tarea.completada ? 'Completada' : 'Pendiente'}]`);
+                });
+            }
+        }
+    }
+
+    // Realiza una copia superficial de una categoría.
+    copiaSuperficialCategoria(categoria) {
+        return { ...this.tareas[categoria] };
+    }
+
+    // Realiza una copia profunda de una categoría.
+    copiaProfundaCategoria(categoria) {
+        return JSON.parse(JSON.stringify(this.tareas[categoria]));
+    }
+}
+
+// Ejemplo de uso:
+const gestorTareas = new GestorTareas();
+
+gestorTareas.agregarTarea('Trabajo', 'Desarrollo', { nombre: 'Revisión de Código', completada: false });
+gestorTareas.agregarTarea('Trabajo', 'Desarrollo', { nombre: 'Escribir Pruebas Unitarias', completada: false });
+gestorTareas.agregarTarea('Personal', 'Casa', { nombre: 'Limpiar la Casa', completada: false });
+gestorTareas.agregarTarea('Personal', 'Casa', { nombre: 'Comprar Comestibles', completada: false });
+
+gestorTareas.actualizarEstadoTarea('Trabajo', 'Desarrollo', 'Revisión de Código', true);
+
+gestorTareas.listarTareas();
+
+const copiaSuperficial = gestorTareas.copiaSuperficialCategoria('Trabajo');
+const copiaProfunda = gestorTareas.copiaProfundaCategoria('Trabajo');
+
+console.log('Copia Superficial:', copiaSuperficial);
+console.log('Copia Profunda:', copiaProfunda);
+
+gestorTareas.fusionarCategorias('Trabajo', 'Personal', 'CategoriaFusionada');
+gestorTareas.listarTareas();
+
+// Pregunta 2 --> utilizando anotaciones
+/**
+ * Calcula la media de un array de números.
+ * @param {number[]} numeros - Array de números.
+ * @returns {number} La media de los números.
+ */
+function calcularMedia(numeros) {
+    return numeros.reduce((suma, num) => suma + num, 0) / numeros.length;
+}
+
+/**
+ * Calcula la mediana de un array de números.
+ * @param {number[]} numeros - Array de números.
+ * @returns {number} La mediana de los números.
+ */
+function calcularMediana(numeros) {
+    const ordenados = [...numeros].sort((a, b) => a - b);
+    const mitad = Math.floor(ordenados.length / 2);
+    return ordenados.length % 2 === 0 ? (ordenados[mitad - 1] + ordenados[mitad]) / 2 : ordenados[mitad];
+}
+
+/**
+ * Calcula la moda de un array de números.
+ * @param {number[]} numeros - Array de números.
+ * @returns {number[]} La moda de los números.
+ */
+function calcularModa(numeros) {
+    const mapaFrecuencia = {};
+    numeros.forEach(num => mapaFrecuencia[num] = (mapaFrecuencia[num] || 0) + 1);
+    const maxFrecuencia = Math.max(...Object.values(mapaFrecuencia));
+    return Object.keys(mapaFrecuencia).filter(key => mapaFrecuencia[key] === maxFrecuencia).map(Number);
+}
+
+/**
+ * Calcula la desviación estándar de un array de números.
+ * @param {number[]} numeros - Array de números.
+ * @returns {number} La desviación estándar de los números.
+ */
+function calcularDesviacionEstandar(numeros) {
+    const media = calcularMedia(numeros);
+    const varianza = numeros.reduce((suma, num) => suma + Math.pow(num - media, 2), 0) / numeros.length;
+    return Math.sqrt(varianza);
+}
+
+/**
+ * Realiza un análisis estadístico completo sobre un array de datos organizados en categorías.
+ * @param {Object[]} datos - Array de objetos con datos.
+ * @param {string} clave - Clave para el análisis (por ejemplo, "edad", "ingreso").
+ */
+function analizarDatos(datos, clave) {
+    const gruposPorCategoria = {};
+
+    // Agrupar datos por categoría
+    datos.forEach(item => {
+        const valor = item[clave];
+        if (valor !== undefined) {
+            if (!gruposPorCategoria[item.categoria]) {
+                gruposPorCategoria[item.categoria] = [];
+            }
+            gruposPorCategoria[item.categoria].push(valor);
+        }
+    });
+
+    // Calcular estadísticas por categoría
+    for (let categoria in gruposPorCategoria) {
+        const numeros = gruposPorCategoria[categoria];
+        const media = calcularMedia(numeros);
+        const mediana = calcularMediana(numeros);
+        const moda = calcularModa(numeros);
+        const desviacionEstandar = calcularDesviacionEstandar(numeros);
+
+        console.log(`Categoría: ${categoria}`);
+        console.log(`  Media: ${media}`);
+        console.log(`  Mediana: ${mediana}`);
+        console.log(`  Moda: ${moda}`);
+        console.log(`  Desviación Estándar: ${desviacionEstandar}`);
+    }
+}
+
+/**
+ * Calcula la diferencia en días entre dos fechas.
+ * @param {Date} fecha1 - Primera fecha.
+ * @param {Date} fecha2 - Segunda fecha.
+ * @returns {number} Diferencia en días entre las dos fechas.
+ */
+function calcularDiferenciaFechas(fecha1, fecha2) {
+    const diferenciaTiempo = Math.abs(fecha2 - fecha1);
+    return Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
+}
+
+// Ejemplo de uso:
+const datos = [
+    { categoria: 'A', edad: 25, ingreso: 50000 },
+    { categoria: 'B', edad: 30, ingreso: 60000 },
+    { categoria: 'A', edad: 22, ingreso: 48000 },
+    { categoria: 'B', edad: 35, ingreso: 65000 },
+    { categoria: 'A', edad: 28, ingreso: 54000 },
+    { categoria: 'C', edad: 40, ingreso: 70000 },
+];
+
+analizarDatos(datos, 'edad');
+analizarDatos(datos, 'ingreso');
+
+// Cálculo de diferencia de fechas
+const fecha1 = new Date('2023-01-01');
+const fecha2 = new Date('2023-12-31');
+const diferenciaDias = calcularDiferenciaFechas(fecha1, fecha2);
+console.log(`Diferencia en días: ${diferenciaDias}`);
+
+
+// Version 1 - Pregunta 1
+
 // Definición de permisos posibles
 const PERMISSIONS = {
     READ: 'read',
