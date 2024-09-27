@@ -1,4 +1,4 @@
-### Comenzando con Create React App
+### Comenzando con un ejemplo Create React App
 
 Este proyecto fue iniciado con [Create React App](https://github.com/facebook/create-react-app).
 
