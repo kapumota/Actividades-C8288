@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="App">
       <Alert heading="Success" closable>
-        Everything is really good!
+       Todo esta bien!.
       </Alert>
     </div>
   );
