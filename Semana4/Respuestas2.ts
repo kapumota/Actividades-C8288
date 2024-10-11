@@ -1,3 +1,4 @@
+// Version de la evaluación - parte 1
 //Ejercicio: Simulación de un servidor web con temporizadores y async/await
 // Fase 1: Uso de Callbacks
 // servidor_callbacks.js
@@ -575,7 +576,7 @@ class ServidorWebAsyncAwait {
 // Iniciar el servidor con async/await
 new ServidorWebAsyncAwait();
 
-//Ejercicio 2: Sistema de permisos basado en herencia y prototipos
+//Ejercicio: Sistema de permisos basado en herencia y prototipos
 // permisos.ts
 
 // Clase Base UsuarioBase
@@ -653,7 +654,7 @@ gestor.agregarPermiso(admin, 'crearReportes'); // Agregado permiso 'crearReporte
 // Usar el método añadido mediante prototipos
 (admin as Admin & { actualizarConfiguraciones: () => void }).actualizarConfiguraciones(); // Configuraciones actualizadas por María López.
 
-// Ejercicio 3: Sistema de registro y validación con tipos refinados y callbacks 
+// Ejercicio: Sistema de registro y validación con tipos refinados y callbacks 
 
 // interfaces.ts
 
@@ -1033,3 +1034,735 @@ sistemaRegistro.registrarUsuario(usuarioValido);
 
 console.log("\nRegistrando usuario inválido:");
 sistemaRegistro.registrarUsuario(usuarioInvalido);
+
+// Version de la evaluación - parte 2
+// Ejercicio 1: Gestión de proyectos y equipos con Generics, Async/Await, y Utility Types
+// tipos.ts
+
+// Union Types para los roles de los miembros del equipo
+export type Rol = "desarrollador" | "diseñador" | "gerente";
+
+// Interface para miembros del equipo
+export interface MiembroEquipo {
+    id: number;
+    nombre: string;
+    rol: Rol;
+}
+
+// Interface para tareas
+export interface Tarea {
+    id: number;
+    descripcion: string;
+    estado: "pendiente" | "completada";
+}
+
+// Tipo Intersect para propiedades comunes a todos los proyectos
+export type PropiedadesComunes = {
+    nombre: string;
+    fechaInicio: Date;
+};
+
+// Interfaces específicas para cada tipo de proyecto
+export interface ProyectoDesarrolloWeb extends PropiedadesComunes {
+    framework: string;
+}
+
+export interface ProyectoDisenoGrafico extends PropiedadesComunes {
+    herramientas: string[];
+}
+
+export interface ProyectoMarketing extends PropiedadesComunes {
+    plataforma: string;
+}
+
+// Union Type para tipos de proyectos
+export type TipoProyecto = ProyectoDesarrolloWeb | ProyectoDisenoGrafico | ProyectoMarketing;
+
+// Proyecto.ts
+
+import { TipoProyecto, MiembroEquipo, Tarea } from "./tipos";
+
+export class Proyecto<T extends TipoProyecto> {
+    private static contadorId = 1;
+    private readonly id: number;
+    private nombre: string;
+    private fechaInicio: Date;
+    private propiedadesEspecificas: T;
+    private miembrosEquipo: MiembroEquipo[];
+    private tareas: Tarea[];
+
+    constructor(
+        nombre: string,
+        fechaInicio: Date,
+        propiedadesEspecificas: T
+    ) {
+        this.id = Proyecto.contadorId++;
+        this.nombre = nombre;
+        this.fechaInicio = fechaInicio;
+        this.propiedadesEspecificas = propiedadesEspecificas;
+        this.miembrosEquipo = [];
+        this.tareas = [];
+    }
+
+    // Método para obtener el ID (solo lectura)
+    getId(): number {
+        return this.id;
+    }
+
+    // Método para obtener el nombre
+    getNombre(): string {
+        return this.nombre;
+    }
+
+    // Método para asignar un miembro al equipo
+    asignarMiembro(miembro: MiembroEquipo): void {
+        this.miembrosEquipo.push(miembro);
+        console.log(`Miembro ${miembro.nombre} (${miembro.rol}) asignado al proyecto '${this.nombre}'.`);
+    }
+
+    // Método para agregar una tarea
+    agregarTarea(tarea: Omit<Tarea, "id" | "estado">): void {
+        const nuevaTarea: Tarea = {
+            id: this.tareas.length + 1,
+            descripcion: tarea.descripcion,
+            estado: "pendiente",
+        };
+        this.tareas.push(nuevaTarea);
+        console.log(`Tarea '${nuevaTarea.descripcion}' agregada al proyecto '${this.nombre}'.`);
+    }
+
+    // Método para asignar una tarea a un miembro de manera asíncrona
+    async asignarTareaAsync(tareaId: number, miembroId: number): Promise<void> {
+        const tarea = this.tareas.find(t => t.id === tareaId);
+        const miembro = this.miembrosEquipo.find(m => m.id === miembroId);
+
+        if (!tarea) {
+            console.error(`Tarea con ID ${tareaId} no encontrada.`);
+            return;
+        }
+
+        if (!miembro) {
+            console.error(`Miembro con ID ${miembroId} no encontrado.`);
+            return;
+        }
+
+        // Simular retraso de 2 segundos
+        await this.simularRetraso(2000);
+
+        tarea.estado = "completada";
+        console.log(`Tarea '${tarea.descripcion}' asignada a ${miembro.nombre} y marcada como completada.`);
+    }
+
+    // Método para simular un retraso
+    private simularRetraso(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Método para mostrar el estado final de las tareas
+    mostrarEstadoTareas(): void {
+        console.log(`\nEstado final de las tareas del proyecto '${this.nombre}':`);
+        this.tareas.forEach(tarea => {
+            console.log(`- Tarea ${tarea.id} (${tarea.descripcion}): ${tarea.estado}`);
+        });
+    }
+}
+// GestionProyectos.ts
+
+import { Proyecto } from "./Proyecto";
+import { TipoProyecto, MiembroEquipo, Tarea, ProyectoDesarrolloWeb, ProyectoDisenoGrafico, ProyectoMarketing } from "./tipos";
+
+export class GestionProyectos {
+    private proyectos: Proyecto<TipoProyecto>[];
+    private miembrosGlobales: MiembroEquipo[];
+
+    constructor() {
+        this.proyectos = [];
+        this.miembrosGlobales = [];
+    }
+
+    // Método para crear un proyecto
+    crearProyecto<T extends TipoProyecto>(
+        tipo: "desarrollo web" | "diseño grafico" | "marketing",
+        nombre: string,
+        fechaInicio: Date,
+        propiedadesEspecificas: T
+    ): Proyecto<T> | null {
+        let proyecto: Proyecto<T> | null = null;
+
+        switch (tipo.toLowerCase()) {
+            case "desarrollo web":
+                proyecto = new Proyecto<T>(nombre, fechaInicio, propiedadesEspecificas);
+                break;
+            case "diseño grafico":
+                proyecto = new Proyecto<T>(nombre, fechaInicio, propiedadesEspecificas);
+                break;
+            case "marketing":
+                proyecto = new Proyecto<T>(nombre, fechaInicio, propiedadesEspecificas);
+                break;
+            default:
+                console.error(`Tipo de proyecto '${tipo}' no reconocido.`);
+                return null;
+        }
+
+        this.proyectos.push(proyecto);
+        console.log(`Proyecto creado: { id: ${proyecto.getId()}, nombre: '${proyecto.getNombre()}', ...propiedadesEspecificas }`);
+        return proyecto;
+    }
+
+    // Método para agregar un miembro al equipo global
+    agregarMiembro(miembro: MiembroEquipo): void {
+        this.miembrosGlobales.push(miembro);
+        console.log(`Miembro global agregado: ${miembro.nombre} (${miembro.rol}).`);
+    }
+
+    // Método para asignar un miembro a un proyecto
+    asignarMiembroAProyecto(proyectoId: number, miembroId: number): void {
+        const proyecto = this.proyectos.find(p => p.getId() === proyectoId);
+        const miembro = this.miembrosGlobales.find(m => m.id === miembroId);
+
+        if (!proyecto) {
+            console.error(`Proyecto con ID ${proyectoId} no encontrado.`);
+            return;
+        }
+
+        if (!miembro) {
+            console.error(`Miembro con ID ${miembroId} no encontrado.`);
+            return;
+        }
+
+        proyecto.asignarMiembro(miembro);
+    }
+
+    // Método para asignar tareas de manera asíncrona
+    async asignarTareas(proyectoId: number, asignaciones: { tareaId: number; miembroId: number }[]): Promise<void> {
+        const proyecto = this.proyectos.find(p => p.getId() === proyectoId);
+
+        if (!proyecto) {
+            console.error(`Proyecto con ID ${proyectoId} no encontrado.`);
+            return;
+        }
+
+        console.log("\nAsignación de tareas en proceso...");
+
+        const promesas = asignaciones.map(asignacion => proyecto.asignarTareaAsync(asignacion.tareaId, asignacion.miembroId));
+
+        await Promise.all(promesas);
+
+        console.log("\nTodas las tareas han sido asignadas y completadas.");
+    }
+
+    // Método para mostrar el estado final de las tareas de un proyecto
+    mostrarEstadoFinal(proyectoId: number): void {
+        const proyecto = this.proyectos.find(p => p.getId() === proyectoId);
+
+        if (!proyecto) {
+            console.error(`Proyecto con ID ${proyectoId} no encontrado.`);
+            return;
+        }
+
+        proyecto.mostrarEstadoTareas();
+    }
+}
+//Ejemplo de uso
+// index.ts
+
+import { GestionProyectos } from "./GestionProyectos";
+import { TipoProyecto, MiembroEquipo } from "./tipos";
+import { ProyectoDesarrolloWeb } from "./tipos";
+
+// Crear una instancia de la gestión de proyectos
+const gestionProyectos = new GestionProyectos();
+
+// Crear un proyecto de Desarrollo Web
+const proyectoDesarrolloWeb = gestionProyectos.crearProyecto<ProyectoDesarrolloWeb>(
+    "desarrollo web",
+    "Sitio Web XYZ",
+    new Date("2024-10-01"),
+    { nombre: "Sitio Web XYZ", fechaInicio: new Date("2024-10-01"), framework: "React" }
+);
+
+// Crear un equipo con 3 miembros
+const miembro1: MiembroEquipo = { id: 1, nombre: "Ana", rol: "desarrollador" };
+const miembro2: MiembroEquipo = { id: 2, nombre: "Luis", rol: "diseñador" };
+const miembro3: MiembroEquipo = { id: 3, nombre: "Pedro", rol: "gerente" };
+
+gestionProyectos.agregarMiembro(miembro1);
+gestionProyectos.agregarMiembro(miembro2);
+gestionProyectos.agregarMiembro(miembro3);
+
+// Asignar miembros al proyecto
+if (proyectoDesarrolloWeb) {
+    gestionProyectos.asignarMiembroAProyecto(proyectoDesarrolloWeb.getId(), 1); // Ana
+    gestionProyectos.asignarMiembroAProyecto(proyectoDesarrolloWeb.getId(), 2); // Luis
+    gestionProyectos.asignarMiembroAProyecto(proyectoDesarrolloWeb.getId(), 3); // Pedro
+
+    // Agregar tareas al proyecto
+    proyectoDesarrolloWeb.agregarTarea({ descripcion: "Desarrollar componente de login" });
+    proyectoDesarrolloWeb.agregarTarea({ descripcion: "Diseñar interfaz del panel de administración" });
+
+    // Asignar tareas de manera asíncrona
+    gestionProyectos.asignarTareas(proyectoDesarrolloWeb.getId(), [
+        { tareaId: 1, miembroId: 1 }, // Ana
+        { tareaId: 2, miembroId: 2 }, // Luis
+    }).then(() => {
+        // Mostrar el estado final de las tareas
+        gestionProyectos.mostrarEstadoFinal(proyectoDesarrolloWeb.getId());
+    });
+}
+
+// Ejercicio :Generador de informes académicos utilizando generics, utility types y funciones asíncronas
+// Definición de Calificación
+interface Calificacion {
+    materia: string;
+    calificacion: number;
+}
+
+// Definición de Asignatura con propiedades adicionales opcionales
+type Asignatura = Readonly<{
+    id: string;
+    nombre: string;
+}> & Partial<{
+    descripcion: string;
+}>;
+
+// Definición de Estudiante
+interface Estudiante {
+    id: string;
+    nombre: string;
+    asignaturas: Calificacion[];
+}
+
+// Tipos para informes
+type InformeEstudiante = {
+    id: string;
+    nombre: string;
+    promedio: number;
+    situacion: 'Aprobado' | 'Reprobado';
+};
+
+type InformeGeneral = {
+    totalEstudiantes: number;
+    promedioGeneral: number;
+    aprobados: number;
+    reprobados: number;
+};
+
+// Simulación de datos
+const datosEstudiantes: Estudiante[] = [
+    {
+        id: '123',
+        nombre: 'Juan',
+        asignaturas: [
+            { materia: 'Matemáticas', calificacion: 90 },
+            { materia: 'Historia', calificacion: 75 },
+            { materia: 'Ciencias', calificacion: 85 }
+        ]
+    },
+    {
+        id: '124',
+        nombre: 'María',
+        asignaturas: [
+            { materia: 'Matemáticas', calificacion: 60 },
+            { materia: 'Historia', calificacion: 55 },
+            { materia: 'Ciencias', calificacion: 65 }
+        ]
+    },
+    {
+        id: '125',
+        nombre: 'Luis',
+        asignaturas: [
+            { materia: 'Matemáticas', calificacion: 80 },
+            { materia: 'Historia', calificacion: 85 },
+            { materia: 'Ciencias', calificacion: 90 }
+        ]
+    }
+];
+
+// Función para obtener estudiantes de manera asíncrona
+const obtenerEstudiantes = async (): Promise<Estudiante[]> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(datosEstudiantes);
+        }, 1000); // Simula un retraso de 1 segundo
+    });
+};
+
+// Función para calcular el promedio de un estudiante
+const calcularPromedio = (asignaturas: Calificacion[]): number => {
+    const total = asignaturas.reduce((sum, asignatura) => sum + asignatura.calificacion, 0);
+    return parseFloat((total / asignaturas.length).toFixed(2));
+};
+
+// Función para determinar la situación académica
+const determinarSituacion = (promedio: number): 'Aprobado' | 'Reprobado' => {
+    return promedio >= 60 ? 'Aprobado' : 'Reprobado';
+};
+
+// Función para generar informe individual
+const generarInformeEstudiante = (estudiante: Estudiante): InformeEstudiante => {
+    const promedio = calcularPromedio(estudiante.asignaturas);
+    const situacion = determinarSituacion(promedio);
+    return {
+        id: estudiante.id,
+        nombre: estudiante.nombre,
+        promedio,
+        situacion
+    };
+};
+
+// Función para generar informe general
+const generarInformeGeneral = (informes: InformeEstudiante[]): InformeGeneral => {
+    const totalEstudiantes = informes.length;
+    const promedioGeneral = parseFloat(
+        (
+            informes.reduce((sum, informe) => sum + informe.promedio, 0) / totalEstudiantes
+        ).toFixed(2)
+    );
+    const aprobados = informes.filter(informe => informe.situacion === 'Aprobado').length;
+    const reprobados = totalEstudiantes - aprobados;
+
+    return {
+        totalEstudiantes,
+        promedioGeneral,
+        aprobados,
+        reprobados
+    };
+};
+
+// Función genérica para procesar informes
+const procesarInformes = async <T, U>(
+    obtenerDatos: () => Promise<T[]>,
+    procesar: (dato: T) => U
+): Promise<U[]> => {
+    try {
+        const datos = await obtenerDatos();
+        return datos.map(procesar);
+    } catch (error) {
+        console.error('Error al procesar los informes:', error);
+        return [];
+    }
+};
+
+// Función principal para generar todos los informes
+const generarTodosLosInformes = async () => {
+    try {
+        // Obtener estudiantes
+        const estudiantes = await obtenerEstudiantes();
+
+        // Validar datos
+        if (!Array.isArray(estudiantes)) {
+            throw new Error('Los datos de estudiantes no son válidos.');
+        }
+
+        // Procesar informes individuales usando generics
+        const informesEstudiante: InformeEstudiante[] = await procesarInformes<Estudiante, InformeEstudiante>(
+            obtenerEstudiantes,
+            generarInformeEstudiante
+        );
+
+        // Generar informe general
+        const informeGeneral: InformeGeneral = generarInformeGeneral(informesEstudiante);
+
+        // Mostrar informes
+        console.log('--- Informes Individuales ---');
+        informesEstudiante.forEach(informe => {
+            console.log(`ID: ${informe.id}, Nombre: ${informe.nombre}, Promedio: ${informe.promedio}, Situación: ${informe.situacion}`);
+        });
+
+        console.log('\n--- Informe General ---');
+        console.log(`Total de Estudiantes: ${informeGeneral.totalEstudiantes}`);
+        console.log(`Promedio General: ${informeGeneral.promedioGeneral}`);
+        console.log(`Aprobados: ${informeGeneral.aprobados}`);
+        console.log(`Reprobados: ${informeGeneral.reprobados}`);
+    } catch (error) {
+        console.error('Error al generar los informes:', error);
+    }
+};
+
+// Ejecutar la generación de informes
+generarTodosLosInformes();
+
+// Ejercicio : Simulador de red de computadoras con polimorfismo, herencia y tipos avanzados
+// Tipos de paquetes de datos
+type TipoPaquete = 'texto' | 'imagen' | 'video';
+
+// Interface para un Paquete de Datos genérico
+interface Paquete<T extends TipoPaquete = TipoPaquete> {
+    tipo: T;
+    tamaño: number; // en KB
+}
+
+// Interfaces específicas para cada tipo de paquete
+interface PaqueteTexto extends Paquete<'texto'> {
+    contenido: string;
+}
+
+interface PaqueteImagen extends Paquete<'imagen'> {
+    resolución: string; // Ejemplo: "1920x1080"
+}
+
+interface PaqueteVideo extends Paquete<'video'> {
+    duración: number; // en segundos
+}
+
+// Union Type para todos los tipos de paquetes
+type PaqueteDatos = PaqueteTexto | PaqueteImagen | PaqueteVideo;
+
+// Tipos de dispositivos de red
+type TipoDispositivo = 'enrutador' | 'switch' | 'servidor';
+
+// Interface para la definición de un Dispositivo de Red
+interface DefinicionDispositivo {
+    tipo: TipoDispositivo;
+    capacidad: number; // en Mbps
+}
+
+// Interface para el estado de un dispositivo después del procesamiento
+interface EstadoDispositivo {
+    dispositivo: DispositivoRed;
+    paquetesProcesados: PaqueteDatos[];
+    capacidadRestante: number; // en Mbps
+}
+
+// Interface para el estado de la red
+interface EstadoRed {
+    dispositivos: EstadoDispositivo[];
+}
+
+// Clase abstracta para Dispositivo de Red
+abstract class DispositivoRed {
+    readonly tipo: TipoDispositivo;
+    capacidad: number; // en Mbps
+
+    constructor(tipo: TipoDispositivo, capacidad: number) {
+        this.tipo = tipo;
+        this.capacidad = capacidad;
+    }
+
+    // Método abstracto para procesar un paquete
+    abstract procesarPaquete(paquete: PaqueteDatos): Promise<boolean>;
+
+    // Método para verificar si el dispositivo puede procesar el paquete
+    puedeProcesar(paquete: PaqueteDatos): boolean {
+        // Por defecto, todos los dispositivos pueden procesar texto
+        if (paquete.tipo === 'texto') return true;
+        // Implementar lógica específica en las clases derivadas
+        return false;
+    }
+}
+
+// Clase Enrutador
+class Enrutador extends DispositivoRed {
+    constructor(capacidad: number) {
+        super('enrutador', capacidad);
+    }
+
+    puedeProcesar(paquete: PaqueteDatos): boolean {
+        // Enrutadores pueden procesar texto e imagen
+        return paquete.tipo === 'texto' || paquete.tipo === 'imagen';
+    }
+
+    async procesarPaquete(paquete: PaqueteDatos): Promise<boolean> {
+        if (!this.puedeProcesar(paquete)) return false;
+        // Simular procesamiento asíncrono
+        await this.simularProcesamiento(paquete);
+        // Reducir la capacidad según el tamaño del paquete
+        this.capacidad -= paquete.tamaño * 0.1; // Ejemplo de consumo
+        return true;
+    }
+
+    private simularProcesamiento(paquete: PaqueteDatos): Promise<void> {
+        return new Promise((resolve) => setTimeout(resolve, 500)); // 0.5 segundos
+    }
+}
+
+// Clase Switch
+class Switch extends DispositivoRed {
+    constructor(capacidad: number) {
+        super('switch', capacidad);
+    }
+
+    puedeProcesar(paquete: PaqueteDatos): boolean {
+        // Switches solo pueden procesar paquetes de texto
+        return paquete.tipo === 'texto';
+    }
+
+    async procesarPaquete(paquete: PaqueteDatos): Promise<boolean> {
+        if (!this.puedeProcesar(paquete)) return false;
+        // Simular procesamiento asíncrono
+        await this.simularProcesamiento(paquete);
+        // Reducir la capacidad según el tamaño del paquete
+        this.capacidad -= paquete.tamaño * 0.05; // Ejemplo de consumo
+        return true;
+    }
+
+    private simularProcesamiento(paquete: PaqueteDatos): Promise<void> {
+        return new Promise((resolve) => setTimeout(resolve, 300)); // 0.3 segundos
+    }
+}
+
+// Clase Servidor
+class Servidor extends DispositivoRed {
+    constructor(capacidad: number) {
+        super('servidor', capacidad);
+    }
+
+    puedeProcesar(paquete: PaqueteDatos): boolean {
+        // Servidores pueden procesar texto, imagen y video
+        return paquete.tipo === 'texto' || paquete.tipo === 'imagen' || paquete.tipo === 'video';
+    }
+
+    async procesarPaquete(paquete: PaqueteDatos): Promise<boolean> {
+        if (!this.puedeProcesar(paquete)) return false;
+        // Simular procesamiento asíncrono
+        await this.simularProcesamiento(paquete);
+        // Reducir la capacidad según el tamaño del paquete
+        this.capacidad -= paquete.tamaño * 0.2; // Ejemplo de consumo
+        return true;
+    }
+
+    private simularProcesamiento(paquete: PaqueteDatos): Promise<void> {
+        return new Promise((resolve) => setTimeout(resolve, 1000)); // 1 segundo
+    }
+}
+
+// Simulación de datos de dispositivos
+const datosDispositivos: DefinicionDispositivo[] = [
+    { tipo: 'enrutador', capacidad: 1000 },
+    { tipo: 'switch', capacidad: 500 },
+    { tipo: 'servidor', capacidad: 2000 }
+];
+
+// Simulación de datos de paquetes
+const datosPaquetes: PaqueteDatos[] = [
+    { tipo: 'texto', tamaño: 500, contenido: 'Hola mundo' },
+    { tipo: 'imagen', tamaño: 1200, resolución: '1920x1080' },
+    { tipo: 'video', tamaño: 3000, duración: 120 },
+    { tipo: 'texto', tamaño: 800, contenido: 'Otro mensaje' },
+    { tipo: 'video', tamaño: 2500, duración: 60 }
+];
+
+// Función para obtener dispositivos de manera asíncrona
+const obtenerDispositivos = async (): Promise<DefinicionDispositivo[]> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(datosDispositivos);
+        }, 1000); // Simula un retraso de 1 segundo
+    });
+};
+
+// Función para obtener paquetes de manera asíncrona
+const obtenerPaquetes = async (): Promise<PaqueteDatos[]> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(datosPaquetes);
+        }, 1000); // Simula un retraso de 1 segundo
+    });
+};
+
+// Clase para gestionar la Red de Computadoras
+class RedComputadoras {
+    dispositivos: DispositivoRed[];
+    paquetes: PaqueteDatos[];
+
+    constructor(dispositivos: DispositivoRed[], paquetes: PaqueteDatos[]) {
+        this.dispositivos = dispositivos;
+        this.paquetes = paquetes;
+    }
+
+    // Método para procesar todos los paquetes
+    async procesarPaquetes(): Promise<EstadoRed> {
+        const estadoRed: EstadoRed = { dispositivos: [] };
+
+        for (const dispositivo of this.dispositivos) {
+            const estadoDispositivo: EstadoDispositivo = {
+                dispositivo,
+                paquetesProcesados: [],
+                capacidadRestante: dispositivo.capacidad
+            };
+            estadoRed.dispositivos.push(estadoDispositivo);
+        }
+
+        for (const paquete of this.paquetes) {
+            let procesado = false;
+
+            for (const estadoDispositivo of estadoRed.dispositivos) {
+                const dispositivo = estadoDispositivo.dispositivo;
+
+                if (dispositivo.puedeProcesar(paquete) && dispositivo.capacidad >= paquete.tamaño * 0.2) { // Verificación de capacidad
+                    const exito = await dispositivo.procesarPaquete(paquete);
+                    if (exito) {
+                        estadoDispositivo.paquetesProcesados.push(paquete);
+                        estadoDispositivo.capacidadRestante = dispositivo.capacidad;
+                        procesado = true;
+                        console.log(`Paquete de tipo '${paquete.tipo}' procesado por ${dispositivo.tipo}.`);
+                        break; // Paquete procesado, pasar al siguiente
+                    }
+                }
+            }
+
+            if (!procesado) {
+                console.warn(`Paquete de tipo '${paquete.tipo}' no pudo ser procesado por ningún dispositivo.`);
+            }
+        }
+
+        return estadoRed;
+    }
+}
+
+// Función para generar un informe del estado final de la red
+const generarInformeFinal = (estadoRed: EstadoRed): void => {
+    console.log('\n--- Estado Final de la Red ---');
+    estadoRed.dispositivos.forEach((estado, index) => {
+        console.log(`\nDispositivo ${index + 1}:`);
+        console.log(`Tipo: ${estado.dispositivo.tipo}`);
+        console.log(`Capacidad Restante: ${estado.capacidadRestante.toFixed(2)} Mbps`);
+        console.log('Paquetes Procesados:');
+        if (estado.paquetesProcesados.length > 0) {
+            estado.paquetesProcesados.forEach((paquete, idx) => {
+                console.log(`  ${idx + 1}. Tipo: ${paquete.tipo}, Tamaño: ${paquete.tamaño} KB`);
+            });
+        } else {
+            console.log('  Ninguno');
+        }
+    });
+};
+
+// Función principal para ejecutar el simulador
+const ejecutarSimulador = async () => {
+    try {
+        // Obtener dispositivos y paquetes de manera asíncrona
+        const [dispositivosDefinidos, paquetes] = await Promise.all([
+            obtenerDispositivos(),
+            obtenerPaquetes()
+        ]);
+
+        // Instanciar dispositivos según su tipo
+        const dispositivos: DispositivoRed[] = dispositivosDefinidos.map((def) => {
+            switch (def.tipo) {
+                case 'enrutador':
+                    return new Enrutador(def.capacidad);
+                case 'switch':
+                    return new Switch(def.capacidad);
+                case 'servidor':
+                    return new Servidor(def.capacidad);
+                default:
+                    throw new Error(`Tipo de dispositivo desconocido: ${def.tipo}`);
+            }
+        });
+
+        // Crear instancia de la red
+        const red = new RedComputadoras(dispositivos, paquetes);
+
+        // Procesar paquetes
+        const estadoFinal = await red.procesarPaquetes();
+
+        // Generar informe final
+        generarInformeFinal(estadoFinal);
+    } catch (error) {
+        console.error('Error en el simulador de red:', error);
+    }
+};
+
+// Ejecutar el simulador
+ejecutarSimulador();
