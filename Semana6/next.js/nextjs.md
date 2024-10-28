@@ -331,3 +331,378 @@ module.exports = {
 - **reactStrictMode**: Activa las comprobaciones estrictas de React.
 - **images.domains**: Permite cargar imágenes de dominios externos.
 - **i18n**: Configura internacionalización.
+
+¡Claro! A continuación, te guiaré paso a paso para crear una aplicación básica con Next.js, explorando la estructura de archivos y entendiendo cómo funciona cada parte. Esta actividad te ayudará a consolidar los conceptos previamente explicados.
+
+---
+
+### **Creando una aplicación con next.js**
+
+#### **Requisitos previos**
+
+- **Node.js** instalado (versión 12.22.0 o superior)
+- **npm** o **yarn** como gestor de paquetes
+- Conocimientos básicos de **JavaScript** y **React**
+
+#### **Paso 1: Crear un nuevo proyecto next.js**
+
+Utiliza el comando `create-next-app` para generar un nuevo proyecto:
+
+```bash
+npx create-next-app my-next-app
+# O con yarn
+yarn create next-app my-next-app
+```
+
+Este comando creará una carpeta llamada `my-next-app` con la estructura básica de un proyecto Next.js.
+
+#### **Paso 2: Navegar al directorio del proyecto**
+
+```bash
+cd my-next-app
+```
+
+#### **Paso 3: Ejecutar el servidor de desarrollo**
+
+Inicia el servidor de desarrollo para ver la aplicación en funcionamiento:
+
+```bash
+npm run dev
+# O con yarn
+yarn dev
+```
+
+Abre tu navegador y visita `http://localhost:3000`. Verás la página de inicio por defecto de Next.js.
+
+#### **Paso 4: Explorar la estructura de archivos**
+
+Abre el proyecto en tu editor de código preferido (por ejemplo, Visual Studio Code). Observa los siguientes directorios y archivos:
+
+- **pages/**
+- **public/**
+- **styles/**
+- **package.json**
+- **next.config.js** (si existe)
+
+#### **Paso 5: Modificar la página principal**
+
+Abre `pages/index.js` y modifica el contenido para personalizar la página de inicio.
+
+```jsx
+// pages/index.js
+import Head from 'next/head';
+import styles from '../styles/Home.module.css';
+
+export default function Home() {
+  return (
+    <div className={styles.container}>
+      <Head>
+        <title>Mi Primera Aplicación Next.js</title>
+        <meta name="description" content="Aplicación creada con Next.js" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <main className={styles.main}>
+        <h1 className={styles.title}>
+          ¡Bienvenido a mi aplicación Next.js!
+        </h1>
+      </main>
+    </div>
+  );
+}
+```
+
+Guarda los cambios y observa cómo se actualiza la página en el navegador.
+
+#### **Paso 6: Añadir una nueva página**
+
+Crea un archivo llamado `about.js` en el directorio `pages/`.
+
+```jsx
+// pages/about.js
+import Link from 'next/link';
+import styles from '../styles/Home.module.css';
+
+export default function About() {
+  return (
+    <div className={styles.container}>
+      <h1>Acerca de Nosotros</h1>
+      <p>Esta es la página "Acerca de".</p>
+      <Link href="/">Volver al Inicio</Link>
+    </div>
+  );
+}
+```
+
+Ahora, navega a `http://localhost:3000/about` para ver la nueva página.
+
+#### **Paso 7: Crear un componente reutilizable**
+
+Crea un directorio `components/` en la raíz del proyecto y añade un archivo `NavBar.js`.
+
+```jsx
+// components/NavBar.js
+import Link from 'next/link';
+import styles from './NavBar.module.css';
+
+export default function NavBar() {
+  return (
+    <nav className={styles.nav}>
+      <Link href="/">Inicio</Link>
+      <Link href="/about">Acerca de</Link>
+    </nav>
+  );
+}
+```
+
+Crea también un archivo de estilos para la barra de navegación:
+
+```css
+/* components/NavBar.module.css */
+.nav {
+  background-color: #333;
+  padding: 1rem;
+}
+
+.nav a {
+  color: #fff;
+  margin-right: 1rem;
+  text-decoration: none;
+}
+
+.nav a:hover {
+  text-decoration: underline;
+}
+```
+
+### **Paso 8: Integrar el Componente NavBar**
+
+Importa y utiliza `NavBar` en `pages/index.js` y `pages/about.js`.
+
+```jsx
+// Ejemplo en pages/index.js
+import NavBar from '../components/NavBar';
+
+export default function Home() {
+  return (
+    <div>
+      <NavBar />
+      {/* Resto del contenido */}
+    </div>
+  );
+}
+```
+
+Haz lo mismo en `about.js`.
+
+#### **Paso 9: Crear una ruta dinámica**
+
+Crea un archivo `[id].js` dentro de `pages/posts/`.
+
+```jsx
+// pages/posts/[id].js
+import { useRouter } from 'next/router';
+import NavBar from '../../components/NavBar';
+
+export default function Post() {
+  const router = useRouter();
+  const { id } = router.query;
+
+  return (
+    <div>
+      <NavBar />
+      <h1>Post {id}</h1>
+    </div>
+  );
+}
+```
+
+Visita `http://localhost:3000/posts/1` y verás "Post 1".
+
+#### **Paso 10: Implementar getStaticPaths y getStaticProps**
+
+Para pre-renderizar páginas dinámicas, utiliza `getStaticPaths` y `getStaticProps`.
+
+```jsx
+// pages/posts/[id].js
+export async function getStaticPaths() {
+  const paths = [{ params: { id: '1' } }, { params: { id: '2' } }];
+  return { paths, fallback: false };
+}
+
+export async function getStaticProps({ params }) {
+  return {
+    props: {
+      id: params.id,
+    },
+  };
+}
+
+export default function Post({ id }) {
+  return (
+    <div>
+      <NavBar />
+      <h1>Post {id}</h1>
+    </div>
+  );
+}
+```
+
+#### **Paso 11: Añadir una API Route**
+
+Crea un endpoint de API en `pages/api/hello.js`.
+
+```jsx
+// pages/api/hello.js
+export default function handler(req, res) {
+  res.status(200).json({ message: 'Hola desde la API' });
+}
+```
+
+Visita `http://localhost:3000/api/hello` para ver el mensaje JSON.
+
+#### **Paso 12: Consumir la API en el cliente**
+
+Utiliza `fetch` para obtener datos desde la API.
+
+```jsx
+// pages/index.js
+import { useEffect, useState } from 'react';
+import NavBar from '../components/NavBar';
+
+export default function Home() {
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    fetch('/api/hello')
+      .then((res) => res.json())
+      .then((data) => setMessage(data.message));
+  }, []);
+
+  return (
+    <div>
+      <NavBar />
+      <h1>{message}</h1>
+    </div>
+  );
+}
+```
+
+#### **Paso 13: Añadir estilos globales**
+
+Crea o modifica `styles/globals.css`.
+
+```css
+/* styles/globals.css */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+```
+
+Asegúrate de importar este archivo en `pages/_app.js`.
+
+```jsx
+// pages/_app.js
+import '../styles/globals.css';
+
+export default function MyApp({ Component, pageProps }) {
+  return <Component {...pageProps} />;
+}
+```
+
+#### **Paso 14: Configurar variables de entorno**
+
+Crea un archivo `.env.local` en la raíz del proyecto.
+
+```env
+API_URL=http://localhost:3000/api
+```
+
+Utiliza la variable de entorno en tu código.
+
+```jsx
+// pages/index.js
+useEffect(() => {
+  fetch(`${process.env.API_URL}/hello`)
+    .then((res) => res.json())
+    .then((data) => setMessage(data.message));
+}, []);
+```
+
+#### **Paso 15: Optimizar imágenes**
+
+Añade una imagen a tu proyecto en `public/` y utiliza el componente `Image`.
+
+```jsx
+// pages/index.js
+import Image from 'next/image';
+
+export default function Home() {
+  return (
+    <div>
+      <NavBar />
+      <h1>Bienvenido</h1>
+      <Image src="/mi-imagen.jpg" alt="Mi Imagen" width={500} height={300} />
+    </div>
+  );
+}
+```
+
+#### **Paso 16: Configurar el archivo next.config.js**
+
+Si necesitas configurar Next.js, crea o modifica `next.config.js`.
+
+```js
+// next.config.js
+module.exports = {
+  reactStrictMode: true,
+  env: {
+    API_URL: process.env.API_URL,
+  },
+};
+```
+
+#### **Paso 17: Preparar para producción**
+
+Construye la aplicación para producción.
+
+```bash
+npm run build
+# O con yarn
+yarn build
+```
+
+Inicia el servidor en modo producción.
+
+```bash
+npm start
+# O con yarn
+yarn start
+```
+
+#### **Paso 18: Desplegar la aplicación**
+
+Considera desplegar tu aplicación en Vercel.
+
+1. **Regístrate en Vercel**: [vercel.com](https://vercel.com/)
+2. **Conecta tu Repositorio**: Sigue las instrucciones para conectar tu repositorio de GitHub, GitLab o Bitbucket.
+3. **Despliega**: Vercel detectará automáticamente que es un proyecto Next.js y configurará todo por ti.
+
+#### **Paso 19: Añadir soporte para TypeScript (opcional)**
+
+Si prefieres usar TypeScript, puedes agregar soporte fácilmente.
+
+```bash
+touch tsconfig.json
+npm install --save-dev typescript @types/react @types/node
+```
+
+Renombra tus archivos `.js` a `.tsx` y reinicia el servidor de desarrollo.
+
+#### **Paso 20: Explorar funcionalidades avanzadas**
+
+- **Internacionalización (i18n)**: Configura múltiples idiomas en tu aplicación.
+- **Middlewares**: Implementa middlewares para tareas como autenticación.
+- **Incremental Static Regeneration (ISR)**: Actualiza contenido estático después de la compilación.
+
