@@ -332,8 +332,6 @@ module.exports = {
 - **images.domains**: Permite cargar imágenes de dominios externos.
 - **i18n**: Configura internacionalización.
 
-¡Claro! A continuación, te guiaré paso a paso para crear una aplicación básica con Next.js, explorando la estructura de archivos y entendiendo cómo funciona cada parte. Esta actividad te ayudará a consolidar los conceptos previamente explicados.
-
 ---
 
 ### **Creando una aplicación con next.js**
