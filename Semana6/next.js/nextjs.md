@@ -722,4 +722,236 @@ export default function PostPage({ post }) {
 }
 ```
 
+Claro, aquí tienes algunos ejercicios prácticos que puedes implementar en un proyecto Next.js basado en los conceptos avanzados que hemos cubierto. Estos ejercicios ayudarán a solidificar la comprensión de temas como rutas dinámicas, middleware, ISR, optimización de imágenes, internacionalización, y manejo de API.
+
+---
+### Ejercicios
+
+#### Ejercicio 1: Crear páginas de usuarios con rutas dinámicas
+
+**Objetivo:** Practicar la creación de rutas dinámicas y la recuperación de datos en el servidor.
+
+1. Crea una nueva página dinámica en `src/app/users/[id]/page.js`.
+2. Usa `getStaticPaths` y `getStaticProps` para pre-renderizar las páginas de usuario basándote en una lista de usuarios.
+3. Muestra información básica del usuario (nombre, email, etc.).
+
+**Pista:**
+- Simula una lista de usuarios usando un arreglo en el archivo `getStaticPaths`.
+- Cada página de usuario debería ser accesible en `/users/[id]`.
+
+**Código inicial:**
+
+```jsx
+// src/app/users/[id]/page.js
+export async function getStaticPaths() {
+  const users = [{ id: 1 }, { id: 2 }, { id: 3 }]; // Simulación de usuarios
+  const paths = users.map((user) => ({
+    params: { id: user.id.toString() },
+  }));
+  return { paths, fallback: 'blocking' };
+}
+
+export async function getStaticProps({ params }) {
+  const user = { id: params.id, name: `Usuario ${params.id}`, email: `user${params.id}@mail.com` };
+  return { props: { user }, revalidate: 30 };
+}
+
+export default function UserPage({ user }) {
+  return (
+    <div>
+      <h1>Perfil de {user.name}</h1>
+      <p>Email: {user.email}</p>
+    </div>
+  );
+}
+```
+
+---
+
+#### Ejercicio 2: Implementar middleware de autenticación
+
+**Objetivo:** Configurar un middleware para restringir el acceso a ciertas páginas.
+
+1. Crea un `src/middleware.js` que verifique la presencia de una cookie `auth`.
+2. Si la cookie `auth` no existe, redirige a `/login`.
+3. Protege la ruta `/dashboard` para que solo usuarios autenticados puedan acceder.
+
+**Pista:**
+- Usa `NextResponse.redirect(new URL('/login', request.url))` para redireccionar en el middleware.
+
+**Código inicial:**
+
+```js
+// src/middleware.js
+import { NextResponse } from 'next/server';
+
+export function middleware(request) {
+  if (request.nextUrl.pathname.startsWith('/dashboard') && !request.cookies.get('auth')) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+  return NextResponse.next();
+}
+```
+
+---
+
+#### Ejercicio 3: Optimización de imágenes para productos
+
+**Objetivo:** Practicar la optimización de imágenes en Next.js.
+
+1. En la carpeta `public/`, añade una imagen de ejemplo llamada `product.png`.
+2. Crea una página `/products` en `src/app/products/page.js` que muestre esta imagen de manera optimizada utilizando el componente `next/image`.
+3. Ajusta el tamaño de la imagen para que sea 200x200.
+
+**Código inicial:**
+
+```jsx
+// src/app/products/page.js
+import Image from 'next/image';
+
+export default function ProductsPage() {
+  return (
+    <div>
+      <h1>Nuestros Productos</h1>
+      <Image src="/product.png" alt="Producto" width={200} height={200} />
+    </div>
+  );
+}
+```
+
+---
+
+#### Ejercicio 4: Configurar internacionalización (i18n)
+
+**Objetivo:** Configurar el proyecto para manejar múltiples idiomas.
+
+1. Configura `next.config.js` para soportar `es` y `en` como idiomas.
+2. En el archivo `src/app/layout.js`, detecta el idioma actual usando `useRouter()` y muestra un encabezado `Bienvenido` en español y `Welcome` en inglés.
+3. Crea enlaces para cambiar entre idiomas en el encabezado.
+
+**Código inicial:**
+
+```js
+// next.config.js
+module.exports = {
+  i18n: {
+    locales: ['es', 'en'],
+    defaultLocale: 'es',
+  },
+};
+```
+
+```jsx
+// src/app/layout.js
+import { useRouter } from 'next/router';
+
+export default function RootLayout({ children }) {
+  const { locale, locales, defaultLocale } = useRouter();
+
+  return (
+    <html lang={locale}>
+      <body>
+        <header>
+          <h1>{locale === 'es' ? 'Bienvenido' : 'Welcome'}</h1>
+          <nav>
+            {locales.map((loc) => (
+              <a key={loc} href={`/${loc}`}>
+                {loc}
+              </a>
+            ))}
+          </nav>
+        </header>
+        <main>{children}</main>
+      </body>
+    </html>
+  );
+}
+```
+
+---
+
+#### Ejercicio 5: Crear una API con CRUD completo
+
+**Objetivo:** Crear una API REST básica usando rutas API de Next.js.
+
+1. Crea un archivo `src/app/api/products/route.js`.
+2. Implementa los métodos **GET**, **POST**, **PUT**, y **DELETE**.
+   - **GET**: Devuelve una lista de productos.
+   - **POST**: Añade un nuevo producto.
+   - **PUT**: Actualiza un producto existente.
+   - **DELETE**: Elimina un producto.
+
+**Pista:**
+- Usa un arreglo en memoria para almacenar los productos temporalmente.
+
+**Código inicial:**
+
+```js
+// src/app/api/products/route.js
+let products = [{ id: 1, name: 'Producto 1' }];
+
+export async function GET(request) {
+  return new Response(JSON.stringify(products), { headers: { 'Content-Type': 'application/json' } });
+}
+
+export async function POST(request) {
+  const newProduct = await request.json();
+  products.push({ id: products.length + 1, ...newProduct });
+  return new Response(JSON.stringify({ message: 'Producto creado' }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+export async function PUT(request) {
+  const updatedProduct = await request.json();
+  products = products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p));
+  return new Response(JSON.stringify({ message: 'Producto actualizado' }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+export async function DELETE(request) {
+  const { id } = await request.json();
+  products = products.filter((p) => p.id !== id);
+  return new Response(JSON.stringify({ message: 'Producto eliminado' }), { headers: { 'Content-Type': 'application/json' } });
+}
+```
+
+---
+
+#### Ejercicio 6: Uso de ISR con datos externos
+
+**Objetivo:** Configurar ISR para regenerar datos de productos cada 60 segundos.
+
+1. Crea una página de detalles de producto en `src/app/products/[id]/page.js`.
+2. Usa `getStaticPaths` para pre-generar las rutas de los productos.
+3. Usa `getStaticProps` para obtener datos de un producto específico.
+4. Configura `revalidate: 60` para regenerar la página cada 60 segundos.
+
+**Código inicial:**
+
+```jsx
+// src/app/products/[id]/page.js
+export async function getStaticPaths() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`);
+  const products = await res.json();
+  const paths = products.map((product) => ({ params: { id: product.id.toString() } }));
+  return { paths, fallback: 'blocking' };
+}
+
+export async function getStaticProps({ params }) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${params.id}`);
+  const product = await res.json();
+  return {
+    props: { product },
+    revalidate: 60,
+  };
+}
+
+export default function ProductDetail({ product }) {
+  return (
+    <div>
+      <h1>{product.name}</h1>
+      <p>Detalle del producto {product.id}</p>
+    </div>
+  );
+}
+```
+
 
