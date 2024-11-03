@@ -422,7 +422,7 @@ export default nextConfig;
    - `http://localhost:3000/components/weather`
 
 
-Has refactorizado exitosamente las aplicaciones de React y Express.js en tu aplicación Next.js existente, integrando las nuevas funcionalidades dentro de tu estructura actual. 
+Hemos refactorizado las aplicaciones de React y Express.js en tu aplicación Next.js existente, integrando las nuevas funcionalidades dentro de tu estructura actual. 
 Ahora tienes:
 
 - Rutas de API funcionales en `src/app/api/`.
