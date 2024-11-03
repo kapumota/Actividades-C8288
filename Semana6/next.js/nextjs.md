@@ -274,3 +274,452 @@ Este código usa `getStaticPaths` y `getStaticProps` para pre-renderizar la pág
 
 ---
 Este desglose organiza la  estructura y conceptos clave de Next.js en el contexto de un proyecto con carpetas como `src/app/`, `fonts/`, `components/`, y `public/`.
+
+
+---
+### Proyecto básico con Next.js usando `src/app`
+
+#### 1. **Instalación y configuración inicial**
+   Para crear el proyecto con esta estructura, ejecuta el siguiente comando y selecciona las opciones para almacenar el código en la carpeta `src` y usar el `App Router`:
+
+   ```bash
+   npx create-next-app my-next-app
+   ```
+
+   Responde "Yes" para la pregunta de `src directory` y también para `App Router`.
+
+#### 2. **Estructura del proyecto**
+
+   A continuación, se muestra la estructura esperada del proyecto tras la instalación inicial:
+
+   ```
+   my-next-app/
+   ├── .next/
+   ├── node_modules/
+   ├── public/
+   │   ├── favicon.ico
+   │   ├── file.png
+   │   ├── globe.png
+   │   ├── next.png
+   │   ├── vercel.png
+   │   └── window.png
+   ├── src/
+   │   └── app/
+   │       ├── api/
+   │       │   └── hello/route.js
+   │       ├── fonts/
+   │       │   ├── GeistMonoVF.woff
+   │       │   └── GeistVF.woff
+   │       ├── globals.css
+   │       ├── layout.js
+   │       ├── page.module.css
+   │       └── page.js
+   ├── .gitignore
+   ├── package.json
+   ├── README.md
+   └── next.config.js
+   ```
+
+#### 3. **Archivos clave**
+
+   - **public/**: Contiene los archivos estáticos como imágenes (`file.png`, `globe.png`, `next.png`, etc.) que se pueden servir directamente.
+   - **src/app**: Esta es la nueva ubicación de las rutas y componentes. Incluye:
+     - `api/hello/route.js`: Una API básica.
+     - `fonts/`: Almacena archivos de fuentes personalizados (`GeistMonoVF.woff`, `GeistVF.woff`).
+     - `globals.css`: Archivo CSS global para estilos aplicados en toda la aplicación.
+     - `layout.js`: Archivo para definir el diseño global de la aplicación.
+     - `page.js`: Página principal del proyecto.
+     - `page.module.css`: CSS Module para estilos específicos de `page.js`.
+
+#### 4. **Implementación de archivos**
+
+   - **`src/app/page.js`**: Página principal del proyecto.
+
+     ```jsx
+     import styles from './page.module.css';
+
+     export default function Home() {
+       return (
+         <div className={styles.container}>
+           <h1>Bienvenido a mi aplicación Next.js</h1>
+           <p>Esta es la estructura básica usando `src/app`.</p>
+         </div>
+       );
+     }
+     ```
+
+   - **`src/app/layout.js`**: Diseño global que envuelve todas las páginas.
+
+     ```jsx
+     import './globals.css';
+
+     export default function RootLayout({ children }) {
+       return (
+         <html lang="es">
+           <body>
+             <main>{children}</main>
+           </body>
+         </html>
+       );
+     }
+     ```
+
+   - **`src/app/api/hello/route.js`**: Ruta de API simple.
+
+     ```js
+     export async function GET(request) {
+       return new Response(JSON.stringify({ message: 'Hola desde la API' }), {
+         headers: { 'Content-Type': 'application/json' },
+       });
+     }
+     ```
+
+   - **`src/app/globals.css`**: Estilos globales.
+
+     ```css
+     body {
+       margin: 0;
+       font-family: Arial, sans-serif;
+     }
+     ```
+
+   - **`src/app/page.module.css`**: Estilos específicos para la página principal.
+
+     ```css
+     .container {
+       padding: 20px;
+       text-align: center;
+     }
+
+     h1 {
+       color: #0070f3;
+     }
+     ```
+
+#### 5. **Comandos de desarrollo**
+
+   - Para ejecutar el servidor de desarrollo, usa:
+
+     ```bash
+     npm run dev
+     ```
+
+   - Accede a la aplicación en tu navegador en [http://localhost:3000](http://localhost:3000).
+
+#### 6. **Conceptos importantes**
+
+   - **App Router**: Usamos `src/app` como la base de todas las rutas, siguiendo la recomendación de Next.js para proyectos modernos. `page.js` representa la página principal, y `layout.js` aplica un diseño común.
+   - **Rutas API**: La ruta `api/hello/route.js` crea un endpoint accesible en `/api/hello` que responde con un mensaje JSON.
+   - **Componentes y Estilos**: Los archivos CSS (`globals.css` y `page.module.css`) están en el mismo directorio `app`, donde `globals.css` se aplica globalmente, mientras que `page.module.css` está vinculado solo a `page.js`.
+
+
+### Extensiones y conceptos avanzados en Next.js
+
+---
+
+#### 1. **Rutas dinámicas con páginas detalladas**
+
+Supongamos que queremos mostrar páginas de productos con un ID único. Creamos una ruta dinámica en `src/app/products/[id]/page.js` para manejar cada producto.
+
+**Archivo:** `src/app/products/[id]/page.js`
+
+```jsx
+import { useRouter } from 'next/router';
+
+export default function ProductPage() {
+  const router = useRouter();
+  const { id } = router.query;
+
+  return (
+    <div>
+      <h1>Producto ID: {id}</h1>
+      <p>Información detallada del producto {id}.</p>
+    </div>
+  );
+}
+```
+
+**Explicación:** Con `[id]` en el nombre del archivo, Next.js entiende que esta es una ruta dinámica. Al visitar `/products/1`, Next.js renderiza esta página y accede a `id` en la URL.
+
+---
+
+#### 2. **API con CRUD básico**
+
+Expandiendo la API existente, vamos a añadir más endpoints para manejar operaciones CRUD básicas. Creamos un archivo `src/app/api/products/route.js`:
+
+```js
+let products = [
+  { id: 1, name: 'Producto 1' },
+  { id: 2, name: 'Producto 2' },
+];
+
+export async function GET(request) {
+  return new Response(JSON.stringify(products), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+export async function POST(request) {
+  const newProduct = await request.json();
+  products.push({ id: products.length + 1, ...newProduct });
+  return new Response(JSON.stringify({ message: 'Producto creado' }), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+```
+
+**Explicación:** Aquí tenemos dos métodos HTTP:
+- **GET**: Devuelve la lista de productos.
+- **POST**: Añade un nuevo producto a la lista.
+
+---
+
+#### 3. **Middleware para autenticación**
+
+Next.js permite agregar `middleware.js` en la raíz del proyecto para proteger rutas o verificar autenticación.
+
+**Archivo:** `src/middleware.js`
+
+```js
+import { NextResponse } from 'next/server';
+
+export function middleware(request) {
+  const { pathname } = request.nextUrl;
+
+  // Proteger la ruta de productos si el usuario no está autenticado
+  if (pathname.startsWith('/products') && !request.cookies.get('auth')) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  return NextResponse.next();
+}
+```
+
+**Explicación:** El middleware verifica si el usuario está autenticado (aquí usando una cookie `auth`). Si no, redirige a `/login` cuando intenta acceder a `/products`.
+
+---
+
+#### 4. **Incremental Static Regeneration (ISR)**
+
+ISR permite actualizar páginas estáticas después de la compilación. Vamos a implementar ISR para la página de productos.
+
+**Archivo:** `src/app/products/[id]/page.js`
+
+```jsx
+import { useRouter } from 'next/router';
+
+export async function getStaticPaths() {
+  // Solo generaremos estos dos productos de manera estática
+  return {
+    paths: [{ params: { id: '1' } }, { params: { id: '2' } }],
+    fallback: 'blocking', // ISR activado
+  };
+}
+
+export async function getStaticProps({ params }) {
+  // Llamada a la API o base de datos para obtener el producto
+  const product = { id: params.id, name: `Producto ${params.id}` };
+
+  return {
+    props: { product },
+    revalidate: 10, // Revalida cada 10 segundos
+  };
+}
+
+export default function ProductPage({ product }) {
+  const router = useRouter();
+
+  if (router.isFallback) {
+    return <div>Cargando...</div>;
+  }
+
+  return (
+    <div>
+      <h1>{product.name}</h1>
+      <p>Información detallada del producto {product.id}.</p>
+    </div>
+  );
+}
+```
+
+**Explicación:** Esta configuración generará la página de cada producto de manera estática y la revalidará cada 10 segundos, manteniendo la página actualizada sin necesidad de un build completo.
+
+---
+
+#### 5. **Optimización de imágenes con `next/image`**
+
+Vamos a optimizar imágenes añadiendo el componente `Image` de Next.js. En nuestra página principal, cargaremos una imagen de ejemplo.
+
+**Archivo:** `src/app/page.js`
+
+```jsx
+import Image from 'next/image';
+
+export default function Home() {
+  return (
+    <div>
+      <h1>Bienvenido a mi aplicación Next.js</h1>
+      <Image src="/next.png" alt="Logo de Next.js" width={200} height={200} />
+    </div>
+  );
+}
+```
+
+**Explicación:** `next/image` optimiza automáticamente el tamaño y la carga de las imágenes. Esto es útil para mejorar el rendimiento y el SEO.
+
+---
+
+#### 6. **Internacionalización (i18n)**
+
+Next.js facilita la creación de aplicaciones multilingües. Configuramos `next.config.js` para soportar varios idiomas.
+
+**Archivo:** `next.config.js`
+
+```js
+module.exports = {
+  i18n: {
+    locales: ['es', 'en'],
+    defaultLocale: 'es',
+  },
+};
+```
+
+**Uso en el componente `layout.js`**
+
+```jsx
+import { useRouter } from 'next/router';
+
+export default function RootLayout({ children }) {
+  const { locale, locales, defaultLocale } = useRouter();
+
+  return (
+    <html lang={locale}>
+      <body>
+        <header>
+          <h1>{locale === 'es' ? 'Bienvenido' : 'Welcome'}</h1>
+          <nav>
+            {locales.map((loc) => (
+              <a key={loc} href={`/${loc}`}>
+                {loc}
+              </a>
+            ))}
+          </nav>
+        </header>
+        <main>{children}</main>
+      </body>
+    </html>
+  );
+}
+```
+
+**Explicación:** Esta configuración permite cambiar entre los idiomas `es` y `en`, con `es` como predeterminado. Puedes acceder a la aplicación en `http://localhost:3000/en` o `http://localhost:3000/es`.
+
+---
+
+#### 7. **Variables de entorno**
+
+Las variables de entorno son útiles para manejar claves de API, URLs de base de datos, y otros valores sensibles. Crearemos un archivo `.env.local` en la raíz del proyecto.
+
+**Archivo:** `.env.local`
+
+```env
+NEXT_PUBLIC_API_URL=https://miapi.com
+API_KEY_SECRETA=miapikeysecreta
+```
+
+**Uso en código**
+
+```js
+export default function Home() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  return (
+    <div>
+      <h1>API URL: {apiUrl}</h1>
+    </div>
+  );
+}
+```
+
+**Explicación:** `NEXT_PUBLIC_` hace que las variables de entorno estén disponibles en el lado del cliente. Las variables sin `NEXT_PUBLIC_` sólo están disponibles en el servidor, proporcionando una capa de seguridad.
+
+---
+
+#### 8. **Uso de Hooks Personalizados (Custom Hooks)**
+
+Podemos crear hooks personalizados para organizar mejor la lógica de nuestra aplicación. Por ejemplo, un hook para manejar la lógica de autenticación.
+
+**Archivo:** `src/hooks/useAuth.js`
+
+```js
+import { useEffect, useState } from 'react';
+
+export function useAuth() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const auth = document.cookie.includes('auth=true');
+    setIsAuthenticated(auth);
+  }, []);
+
+  return isAuthenticated;
+}
+```
+
+**Uso en componentes**
+
+```jsx
+import { useAuth } from '@/hooks/useAuth';
+
+export default function ProtectedPage() {
+  const isAuthenticated = useAuth();
+
+  if (!isAuthenticated) {
+    return <p>Necesitas estar autenticado para ver esta página.</p>;
+  }
+
+  return <p>Contenido Protegido</p>;
+}
+```
+
+---
+
+#### 9. **Implementación de ISR con datos externos**
+
+Podemos combinar ISR con datos externos como una API para que Next.js regenere las páginas automáticamente cuando cambien los datos.
+
+**Archivo:** `src/app/blog/[id]/page.js`
+
+```jsx
+export async function getStaticPaths() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts`);
+  const posts = await res.json();
+
+  const paths = posts.map((post) => ({
+    params: { id: post.id.toString() },
+  }));
+
+  return { paths, fallback: 'blocking' };
+}
+
+export async function getStaticProps({ params }) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${params.id}`);
+  const post = await res.json();
+
+  return {
+    props: { post },
+    revalidate: 60, // Revalida cada 60 segundos
+  };
+}
+
+export default function PostPage({ post }) {
+  return (
+    <div>
+      <h1>{post.title}</h1>
+      <p>{post.content}</p>
+    </div>
+  );
+}
+```
+
+
