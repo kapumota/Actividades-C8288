@@ -1371,7 +1371,7 @@ Integrar pruebas de seguridad en el pipeline de CI/CD garantiza que las vulnerab
 - **Definición de reglas de seguridad:** Establecer reglas y umbrales que determinen cuándo una construcción o despliegue debe fallar debido a vulnerabilidades detectadas.
 - **Reportes y correcciones:** Generar reportes detallados de las vulnerabilidades detectadas y priorizar su corrección antes de proceder con el despliegue.
 
-### **5. Implementación de autenticación multifactor (MFA)**
+#### **5. Implementación de autenticación multifactor (MFA)**
 
 La autenticación multifactor (MFA) añade una capa adicional de seguridad al proceso de autenticación, reduciendo significativamente el riesgo de accesos no autorizados.
 
