@@ -2566,7 +2566,7 @@ Para mantener la relevancia y competitividad de la plataforma, es importante inn
 
 El **proyecto: sistema automatizado de autorización segura para aplicaciones web en contenedores** representa una iniciativa integral que aborda los desafíos críticos en la gestión y seguridad de aplicaciones web en entornos contenerizados. A través de una arquitectura robusta, la implementación de prácticas avanzadas de ciberseguridad, y la adopción de tecnologías escalables y eficientes, se busca no solo cumplir con los requisitos actuales sino también anticipar y adaptarse a futuras necesidades.
 
-Los dos entregables propuestos, centrados en el desarrollo de una aplicación web funcional con funcionalidades básicas y en la incorporación de características avanzadas y fortalecimiento de la seguridad, sientan las bases para un sistema confiable y eficiente. Los beneficios en términos de seguridad mejorada, escalabilidad y eficiencia, aprendizaje y aplicación de tecnologías modernas, y conciencia de seguridad hacen de este proyecto una inversión valiosa para cualquier organización que busque optimizar la gestión y seguridad de sus aplicaciones web en contenedores.
+---
 
 
 
