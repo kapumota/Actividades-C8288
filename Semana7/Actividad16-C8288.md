@@ -16,7 +16,6 @@ Aprender a implementar pruebas unitarias, de instantáneas y `end-to-end` en una
 4. **Escribir pruebas unitarias para los servicios del clima**
 5. **Ejecutar y verificar las pruebas**
 
----
 
 #### **1. Configuración del entorno de pruebas para el middleware**
 
@@ -302,7 +301,7 @@ Una vez que hayas configurado todas las pruebas, es momento de ejecutarlas y ver
 
 ---
 
-### Continuación - Pruebas end-to-end y de instantáneas en la aplicación del clima**
+### Continuación - Pruebas end-to-end y de instantáneas en la aplicación del clima
 
 #### **Objetivo**
 Expandir la cobertura de pruebas de la aplicación del clima mediante la implementación de una prueba `end-to-end` para la API REST y pruebas de instantáneas para los componentes de la interfaz de usuario utilizando Jest y React Testing Library.
@@ -319,7 +318,6 @@ Expandir la cobertura de pruebas de la aplicación del clima mediante la impleme
 4. **Actualizar la prueba de instantáneas para Cobertura Completa**
 5. **Ejecutar y Verificar las Pruebas Adicionales**
 
----
 
 #### **1. Realizar una prueba end-to-end de la API REST**
 
@@ -416,7 +414,6 @@ Si encuentras errores relacionados con la conexión o el tiempo de espera, ajust
      - La prueba debería pasar exitosamente.
      - La cobertura de código para el archivo `[zipcode].ts` debería ser del 100%.
 
----
 
 #### **2. Configurar el entorno para pruebas de instantáneas**
 
@@ -459,7 +456,6 @@ npm install --save-dev @types/react-test-renderer react-test-renderer
      - **Creación de la configuración de Jest:** Crea una configuración personalizada de Jest basada en las propiedades predeterminadas de Next.js.
      - **Exportación de la configuración:** Exporta la configuración para que Jest la utilice.
 
----
 
 #### **3. Crear la primera versión de la prueba de instantáneas**
 
@@ -552,7 +548,6 @@ Implementaremos una prueba de instantáneas para el componente de la interfaz de
 
    - **Nota:** El contenido exacto puede variar dependiendo de cómo esté implementado tu componente `PageComponentWeather`.
 
----
 
 #### **4. Actualizar la Prueba de Instantáneas para Cobertura Completa**
 
@@ -691,8 +686,6 @@ Para cubrir todas las funcionalidades del componente, agregaremos una segunda ve
      ```
 
    - **Nota:** La segunda instantánea refleja que el contador ha incrementado a `1` después del clic.
-
----
 
 #### **5. Ejecutar y verificar las pruebas adicionales**
 
@@ -839,7 +832,6 @@ Validar que los servicios que interactúan con `WeatherModel` funcionan correcta
 - ¿Cómo asegura una prueba que un servicio interactúa correctamente con un modelo de base de datos?
 - ¿Qué importancia tiene la cobertura de código en las pruebas unitarias?
 
----
 
 #### **Ejercicio 5: Ejecutar y verificar las pruebas**
 
