@@ -765,7 +765,7 @@ Configurar adecuadamente el entorno de pruebas para asegurar que las pruebas se 
 3. **Asegurar la retención de conexiones:**
    - Modifica la función `dbConnect` en el middleware para que retorne una referencia al servidor MongoDB en memoria, facilitando así la limpieza y desconexión durante las pruebas.
 
-#### **Preguntas de reflexión**
+#### **Preguntas:**
 - ¿Por qué es importante aislar el entorno de pruebas del entorno de desarrollo o producción?
 - ¿Qué beneficios aporta el uso de servidores en memoria para las pruebas de bases de datos?
 
@@ -789,7 +789,7 @@ Verificar que la función `dbConnect` interactúe correctamente con MongoDB y Mo
    - Utiliza el comando de pruebas para ejecutar las pruebas unitarias.
    - Asegúrate de que todas las pruebas pasen y que la cobertura sea completa.
 
-#### **Preguntas de peflexión**
+#### **Preguntas:**
 - ¿Cómo asegura una prueba unitaria que una función específica se comporta correctamente?
 - ¿Qué sucede si una de las expectativas en una prueba unitaria no se cumple?
 
@@ -810,7 +810,7 @@ Aislar los servicios de Mongoose mediante la creación de mocks, permitiendo pru
 3. **Integrar los mocks en las pruebas:**
    - Asegúrate de que las pruebas unitarias utilicen los mocks en lugar de las implementaciones reales de Mongoose.
 
-#### **Preguntas de reflexión**
+#### **Preguntas:**
 - ¿Cuál es la ventaja de utilizar mocks en las pruebas unitarias?
 - ¿Cómo afectan los mocks la fiabilidad y mantenimiento de las pruebas?
 
@@ -835,7 +835,7 @@ Validar que los servicios que interactúan con `WeatherModel` funcionan correcta
 4. **Ejecutar y validar las pruebas:**
    - Ejecuta las pruebas y revisa que todas pasen y que la cobertura sea adecuada.
 
-#### **Preguntas de reflexión**
+#### **Preguntas:**
 - ¿Cómo asegura una prueba que un servicio interactúa correctamente con un modelo de base de datos?
 - ¿Qué importancia tiene la cobertura de código en las pruebas unitarias?
 
@@ -857,7 +857,7 @@ Asegurarse de que todas las pruebas configuradas funcionan correctamente y que l
 3. **Identificar y corregir problemas de cobertura:**
    - Si hay líneas de código no cubiertas, considera agregar pruebas adicionales que las abarquen, como simular errores en llamadas asíncronas.
 
-#### **Preguntas de reflexión**
+#### **Preguntas:**
 - ¿Qué acciones tomarías si una prueba falla inesperadamente?
 - ¿Cómo puedes mejorar la cobertura de pruebas sin comprometer la calidad?
 
@@ -883,7 +883,7 @@ Verificar que el flujo completo de la API REST funciona correctamente, desde la 
    - Inicia la aplicación en modo de desarrollo.
    - Ejecuta las pruebas end-to-end y verifica que todas pasen correctamente.
 
-#### **Preguntas de reflexión**
+#### **Preguntas:**
 - ¿Cuál es la diferencia entre una prueba unitária y una prueba end-to-end?
 - ¿Qué aspectos de la aplicación se validan con una prueba end-to-end que no se cubren con pruebas unitarias?
 
@@ -899,7 +899,7 @@ Preparar el entorno de pruebas para permitir la creación y validación de insta
 2. **Actualizar la configuración de Jest:**
    - Modifica el archivo de configuración de Jest (`jest.config.js`) para integrar las herramientas necesarias para las pruebas de instantáneas, especialmente para proyectos basados en Next.js.
 
-#### **Preguntas de reflexión**
+#### **Preguntas:**
 - ¿Qué es una prueba de instantánea y qué ventajas ofrece en el desarrollo de interfaces de usuario?
 - ¿Cómo puede una prueba de instantánea ayudar a detectar cambios no intencionados en la UI?
 
@@ -922,7 +922,7 @@ Implementar pruebas de instantáneas para los componentes de la interfaz de usua
    - Ejecuta las pruebas y revisa que las instantáneas se crean y validan correctamente.
    - Si se detectan cambios en el renderizado esperado, actualiza las instantáneas de manera controlada.
 
-#### **Preguntas de reflexión**
+#### **Preguntas:**
 - ¿Qué pasos seguirías si una prueba de instantánea falla debido a un cambio intencionado en el diseño del componente?
 - ¿Cómo puedes mantener las pruebas de instantáneas eficientes y relevantes a medida que la aplicación evoluciona?
 
@@ -943,7 +943,7 @@ Asegurarse de que todas las pruebas adicionales, incluyendo las de end-to-end y 
 3. **Corregir y mejorar las pruebas según aea necesario:**
    - Si hay pruebas que fallan o áreas con baja cobertura, ajusta las pruebas existentes o agrega nuevas pruebas para abordar estos aspectos.
 
-#### **Preguntas de reflexión**
+#### **Preguntas:**
 - ¿Qué indicadores consideras más importantes al evaluar la calidad de las pruebas en un proyecto?
 - ¿Cómo balanceas la necesidad de alta cobertura con la eficiencia en la ejecución de pruebas?
 
@@ -967,6 +967,6 @@ Reflexionar sobre el proceso de pruebas implementado y buscar oportunidades de m
 4. **Planificar la adición de nuevas pruebas:**
    - A medida que se agregan nuevas funcionalidades al proyecto, planifica la creación de pruebas correspondientes para asegurar que cada nueva característica esté cubierta.
 
-#### **Preguntas de reflexión**
+#### **Preguntas:**
 - ¿Qué desafíos has encontrado al implementar pruebas en este proyecto y cómo los has superado?
 - ¿Cómo asegurarías que las pruebas sigan siendo relevantes y útiles a medida que el proyecto crece?
