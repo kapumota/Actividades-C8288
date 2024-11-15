@@ -1,4 +1,4 @@
-### Algoritmos avanzados en OAuth2 para autenticación y autorización seguras
+### Algoritmos en OAuth2 para autenticación y autorización seguras
 
 OAuth2 utiliza una variedad de algoritmos criptográficos avanzados para garantizar la autenticación y autorización seguras en aplicaciones modernas. A continuación, se detallan los algoritmos más utilizados, junto con ejemplos específicos y consideraciones de seguridad adicionales.
 
