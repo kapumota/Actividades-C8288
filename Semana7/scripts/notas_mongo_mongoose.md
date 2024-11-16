@@ -1,11 +1,24 @@
-mongod
+### Configuración y ejemplos de uso de MongoDB con Node.js y Mongoose
 
+```markdown
+#### Iniciar el servidor MongoDB
+
+mongod
+```
+
+#### Crear el directorio de la aplicación y configurar el proyecto
+
+```bash
 mkdir mi-aplicacion
 cd mi-aplicacion
 npm init -y
 
 npm install mongoose
+```
 
+#### Estructura del proyecto
+
+```plaintext
 mi-aplicacion/
 ├── models/
 │   └── usuario.js
@@ -13,8 +26,12 @@ mi-aplicacion/
 │   └── usuario.js
 ├── app.js
 └── package.json
+```
 
 
+#### Conexión a MongoDB con el cliente oficial
+
+```javascript
 // Importar el cliente de MongoDB
 const { MongoClient } = require('mongodb');
 
@@ -36,7 +53,7 @@ async function main() {
         // Seleccionar la base de datos
         const db = client.db(dbName);
 
-        // ------------------------- Schema-less Design -------------------------
+        // ------------------------- Schema-less design -------------------------
         // MongoDB es una base de datos sin esquema fijo, lo que significa que
         // los documentos en una misma colección pueden tener estructuras diferentes.
         const coleccion = db.collection('usuarios');
@@ -51,7 +68,7 @@ async function main() {
         const resultadoInsert = await coleccion.insertMany(usuarios);
         console.log(`${resultadoInsert.insertedCount} documentos insertados.`);
 
-        // ------------------------- Document-based Storage -------------------------
+        // ------------------------- Document-based storage -------------------------
         // MongoDB almacena datos en documentos BSON (una extensión de JSON),
         // lo que permite almacenar datos complejos y anidados de manera eficiente.
         const documento = await coleccion.findOne({ nombre: 'Juan' });
@@ -200,8 +217,12 @@ async function main() {
 
 // Ejecutar la función principal
 main().catch(console.error);
+```
 
----
+
+#### Conexión a MongoDB con GridFS
+
+```javascript
 // Importar el cliente de MongoDB y GridFS
 const { MongoClient, GridFSBucket } = require('mongodb');
 const fs = require('fs');
@@ -225,7 +246,7 @@ async function main() {
         // Seleccionar la base de datos
         const db = client.db(dbName);
 
-        // ------------------------- Validación de Esquema -------------------------
+        // ------------------------- Validación de esquema -------------------------
         // Definir reglas de validación al crear la colección 'productos'
         const coleccionProductos = db.collection('productos');
         await db.createCollection('productos', {
@@ -289,7 +310,7 @@ async function main() {
             console.error('Error al insertar producto inválido:', error.message);
         }
 
-        // ------------------------- Índices Compuestos y de Texto -------------------------
+        // ------------------------- Índices compuestos y de texto -------------------------
         // Crear un índice compuesto en 'categoria' y 'precio'
         const indiceCompuesto = await coleccionProductos.createIndex({ categoria: 1, precio: -1 });
         console.log('Índice compuesto creado:', indiceCompuesto);
@@ -303,7 +324,7 @@ async function main() {
         const productosTexto = await coleccionProductos.find(busquedaTexto).toArray();
         console.log('Resultados de búsqueda de texto:', productosTexto);
 
-        // ------------------------- Paginación en Consultas -------------------------
+        // ------------------------- Paginación en consultas -------------------------
         // Implementar paginación usando 'limit' y 'skip'
         const pagina = 2;
         const elementosPorPagina = 2;
@@ -344,7 +365,7 @@ async function main() {
                 fs.unlinkSync(rutaDescarga);
             });
 
-        // ------------------------- Manejo Avanzado de Errores -------------------------
+        // ------------------------- Manejo avanzado de errores -------------------------
         // Ejemplo de manejo de errores en operaciones de actualización
         try {
             const actualizarError = await coleccionProductos.updateOne(
@@ -410,15 +431,15 @@ async function main() {
         const ordenesConDetalle = await coleccionOrdenes.aggregate(pipelineLookup).toArray();
         console.log('Ordenes con detalle de productos:', ordenesConDetalle);
 
-        // ------------------------- Implementación de Caching con Índices -------------------------
+        // ------------------------- Implementación de caching con indices -------------------------
         // Utilizar índices para mejorar el rendimiento de las consultas frecuentes
         // Por ejemplo, si se realizan muchas búsquedas por 'categoria', ya creamos un índice compuesto anteriormente
 
-        // ------------------------- Implementación de Rate Limiting en Aplicaciones (Ejemplo Conceptual) -------------------------
+        // ------------------------- Implementación de Rate Limiting en aplicaciones (ejemplo conceptual) -------------------------
         // Aunque MongoDB no maneja directamente el rate limiting, se puede implementar usando una colección para rastrear
         // solicitudes por usuario y aplicar lógica de control en la aplicación.
 
-        // ------------------------- Agregar Más Tipos de Datos -------------------------
+        // ------------------------- Agregar más tipos de datos -------------------------
         // Insertar un documento con tipos de datos variados
         const usuarioAvanzado = {
             nombre: 'Laura',
@@ -440,13 +461,13 @@ async function main() {
         const insertarUsuarioAvanzado = await coleccion.insertOne(usuarioAvanzado);
         console.log('Usuario avanzado insertado con ID:', insertarUsuarioAvanzado.insertedId);
 
-        // ------------------------- Consultas con Operadores Avanzados -------------------------
+        // ------------------------- Consultas con operadores avanzados -------------------------
         // Buscar usuarios con al menos una puntuación mayor a 8
         const consultaAvanzada = { puntuaciones: { $gt: 8 } };
         const usuariosAltaPuntuacion = await coleccion.find(consultaAvanzada).toArray();
         console.log('Usuarios con puntuaciones > 8:', usuariosAltaPuntuacion);
 
-        // ------------------------- Actualizaciones con Operadores de Array -------------------------
+        // ------------------------- Actualizaciones con operadores de array -------------------------
         // Agregar un nuevo interés a Laura
         const actualizarIntereses = await coleccion.updateOne(
             { nombre: 'Laura' },
@@ -454,7 +475,7 @@ async function main() {
         );
         console.log('Intereses actualizados:', actualizarIntereses.modifiedCount);
 
-        // ------------------------- Eliminación de Campos -------------------------
+        // ------------------------- Eliminación de campos -------------------------
         // Eliminar el campo 'perfil.linkedin' de Laura
         const eliminarCampo = await coleccion.updateOne(
             { nombre: 'Laura' },
@@ -473,7 +494,7 @@ async function main() {
         const resultadoBulk = await coleccionProductos.bulkWrite(operacionesBulk);
         console.log('Operaciones bulk realizadas:', resultadoBulk);
 
-        // ------------------------- Monitoreo de Rendimiento con Explain -------------------------
+        // ------------------------- Monitoreo de rendimiento con Explain -------------------------
         // Utilizar 'explain' para analizar el rendimiento de una consulta
         const consultaExplain = await coleccionProductos.find({ categoria: 'Periféricos' }).explain('executionStats');
         console.log('Explicación de la consulta:', JSON.stringify(consultaExplain, null, 2));
@@ -489,10 +510,11 @@ async function main() {
 
 // Ejecutar la función principal
 main().catch(console.error);
+```
 
+#### Conexión a MongoDB usando Mongoose
 
-
----
+```javascript
 const mongoose = require('mongoose');
 
 // Reemplaza <username>, <password> y <dbname> con tus credenciales y nombre de la base de datos
@@ -528,10 +550,11 @@ process.on('SIGINT', async () => {
   console.log('Mongoose desconectado por la terminación de la aplicación');
   process.exit(0);
 });
+```
 
+#### Definición del esquema de usuario con Mongoose
 
----
-
+```javascript
 const mongoose = require('mongoose');
 
 const usuarioSchema = new mongoose.Schema({
@@ -562,19 +585,22 @@ const usuarioSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+```
 
-module.exports = usuarioSchema;
+#### Exportación del modelo de usuario
 
----
-
+```javascript
 const mongoose = require('mongoose');
 const usuarioSchema = require('./usuarioSchema'); // Ruta al esquema definido anteriormente
 
 const Usuario = mongoose.model('Usuario', usuarioSchema);
 
 module.exports = Usuario;
+```
 
----
+#### Middleware para Hash de contraseña con bcrypt
+
+```javascript
 const bcrypt = require('bcrypt');
 
 usuarioSchema.pre('save', async function(next) {
@@ -585,10 +611,11 @@ usuarioSchema.pre('save', async function(next) {
   }
   next();
 });
+```
 
+#### Crear un usuario
 
----
-
+```javascript
 const Usuario = require('./models/Usuario'); // Ruta al modelo de usuario
 
 async function crearUsuario() {
@@ -607,9 +634,11 @@ async function crearUsuario() {
 }
 
 crearUsuario();
+```
 
+#### Encontrar y obtener usuarios
 
----
+```javascript
 async function encontrarUsuarioPorCorreo(correo) {
   try {
     const usuario = await Usuario.findOne({ correo: correo });
@@ -635,8 +664,11 @@ async function obtenerTodosLosUsuarios() {
 }
 
 obtenerTodosLosUsuarios();
+```
 
+#### Actualizar la edad de un usuario
 
+```javascript
 async function actualizarEdadUsuario(correo, nuevaEdad) {
   try {
     const usuarioActualizado = await Usuario.findOneAndUpdate(
@@ -655,8 +687,11 @@ async function actualizarEdadUsuario(correo, nuevaEdad) {
 }
 
 actualizarEdadUsuario('juan.perez@example.com', 31);
+```
 
+#### Eliminar un usuario por correo
 
+```javascript
 async function eliminarUsuarioPorCorreo(correo) {
   try {
     const resultado = await Usuario.deleteOne({ correo: correo });
@@ -671,9 +706,12 @@ async function eliminarUsuarioPorCorreo(correo) {
 }
 
 eliminarUsuarioPorCorreo('juan.perez@example.com');
+```
 
 
+#### Flujo completo de operaciones CRUD
 
+```javascript
 async function flujoCompletoUsuarios() {
   try {
     // Crear un nuevo usuario
@@ -710,14 +748,593 @@ async function flujoCompletoUsuarios() {
 }
 
 flujoCompletoUsuarios();
+```
 
 
----
+#### Configuración inicial del proyecto con Mongoose
+
+```bash
 mkdir mongoose_mongodb_ejemplo
 cd mongoose_mongodb_ejemplo
 npm init -y
 npm install mongoose
+```
 
+```javascript
+// Importar Mongoose
+const mongoose = require('mongoose');
+
+// URL de conexión a MongoDB (puede ser local o en la nube)
+const mongoURL = 'mongodb://localhost:27017/miBaseDeDatos';
+
+// Opciones de conexión
+const opciones = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    // useCreateIndex: true, // Obsoleto en versiones recientes
+    // useFindAndModify: false // Obsoleto en versiones recientes
+};
+
+// Conectar a MongoDB usando Mongoose
+mongoose.connect(mongoURL, opciones)
+    .then(() => console.log('Conectado correctamente a MongoDB con Mongoose'))
+    .catch(err => console.error('Error al conectar a MongoDB:', err));
+
+// Definir un esquema de usuario
+const usuarioSchema = new mongoose.Schema({
+    nombre: {
+        type: String,
+        required: [true, 'El nombre es obligatorio'],
+        trim: true,
+        minlength: [3, 'El nombre debe tener al menos 3 caracteres'],
+        maxlength: [50, 'El nombre no puede exceder los 50 caracteres']
+    },
+    email: {
+        type: String,
+        required: [true, 'El correo electrónico es obligatorio'],
+        unique: true,
+        lowercase: true,
+        trim: true,
+        match: [/\S+@\S+\.\S+/, 'Por favor, ingresa un correo electrónico válido']
+    },
+    edad: {
+        type: Number,
+        min: [0, 'La edad no puede ser negativa'],
+        max: [120, 'La edad no puede exceder los 120 años']
+    },
+    fechaRegistro: {
+        type: Date,
+        default: Date.now
+    },
+    direccion: {
+        calle: { type: String, required: true },
+        ciudad: { type: String, required: true },
+        codigoPostal: { type: String, required: true }
+    },
+    hobbies: [String],
+    activo: {
+        type: Boolean,
+        default: true
+    }
+}, {
+    // Opciones de esquema
+    timestamps: true, // Agrega createdAt y updatedAt
+    versionKey: false // Elimina el campo __v
+});
+
+// Virtual: Calcular la edad en meses
+usuarioSchema.virtual('edadEnMeses').get(function () {
+    return this.edad * 12;
+});
+
+// Método de instancia: Saludar
+usuarioSchema.methods.saludar = function () {
+    return `Hola, mi nombre es ${this.nombre}`;
+};
+
+// Método estático: Buscar por ciudad
+usuarioSchema.statics.buscarPorCiudad = function (ciudad) {
+    return this.find({ 'direccion.ciudad': ciudad });
+};
+
+// Middleware: Antes de guardar, convertir el nombre a mayúsculas
+usuarioSchema.pre('save', function (next) {
+    this.nombre = this.nombre.toUpperCase();
+    next();
+});
+
+// Middleware: Después de eliminar, loguear la eliminación
+usuarioSchema.post('remove', function (doc) {
+    console.log(`El usuario con ID ${doc._id} ha sido eliminado.`);
+});
+
+// Crear el modelo de Usuario
+const Usuario = mongoose.model('Usuario', usuarioSchema);
+
+// Definir un esquema de publicación (para demostración de población)
+const publicacionSchema = new mongoose.Schema({
+    titulo: {
+        type: String,
+        required: true
+    },
+    contenido: String,
+    autor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: true
+    },
+    fechaPublicacion: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+// Crear el modelo de publicación
+const Publicacion = mongoose.model('Publicacion', publicacionSchema);
+
+// Función principal para ejecutar operaciones
+async function main() {
+    try {
+        // Limpiar las colecciones existentes
+        await Usuario.deleteMany({});
+        await Publicacion.deleteMany({});
+
+        // Crear nuevos usuarios
+        const usuario1 = new Usuario({
+            nombre: 'Juan Pérez',
+            email: 'juan.perez@example.com',
+            edad: 28,
+            direccion: {
+                calle: 'Calle Falsa 123',
+                ciudad: 'Madrid',
+                codigoPostal: '28001'
+            },
+            hobbies: ['fútbol', 'lectura']
+        });
+
+        const usuario2 = new Usuario({
+            nombre: 'Ana Gómez',
+            email: 'ana.gomez@example.com',
+            edad: 34,
+            direccion: {
+                calle: 'Avenida Siempre Viva 456',
+                ciudad: 'Barcelona',
+                codigoPostal: '08002'
+            },
+            hobbies: ['cine', 'viajes']
+        });
+
+        // Guardar usuarios en la base de datos
+        await usuario1.save();
+        await usuario2.save();
+        console.log('Usuarios creados y guardados.');
+
+        // Crear publicaciones relacionadas con usuarios
+        const publicacion1 = new Publicacion({
+            titulo: 'Mi primer post',
+            contenido: 'Este es el contenido de mi primer post.',
+            autor: usuario1._id
+        });
+
+        const publicacion2 = new Publicacion({
+            titulo: 'Aventuras en Barcelona',
+            contenido: 'Compartiendo mis experiencias en Barcelona.',
+            autor: usuario2._id
+        });
+
+        // Guardar publicaciones
+        await publicacion1.save();
+        await publicacion2.save();
+        console.log('Publicaciones creadas y guardadas.');
+
+        // Buscar un usuario y usar un método de instancia
+        const encontrado = await Usuario.findOne({ email: 'juan.perez@example.com' });
+        console.log(encontrado.saludar()); // Salida: Hola, mi nombre es JUAN PÉREZ
+
+        // Usar un método estático para buscar usuarios por ciudad
+        const usuariosMadrid = await Usuario.buscarPorCiudad('Madrid');
+        console.log('Usuarios en Madrid:', usuariosMadrid);
+
+        // Población: Obtener publicaciones con detalles del autor
+        const publicacionesConAutores = await Publicacion.find().populate('autor', 'nombre email');
+        console.log('Publicaciones con detalles del autor:', publicacionesConAutores);
+
+        // Actualizar un usuario
+        encontrado.edad = 29;
+        await encontrado.save();
+        console.log('Edad actualizada:', encontrado.edad);
+
+        // Utilizar el virtual 'edadEnMeses'
+        console.log(`Edad de ${encontrado.nombre} en meses:`, encontrado.edadEnMeses);
+
+        // Eliminar un usuario y observar el middleware post 'remove'
+        await encontrado.remove();
+
+        // Crear índices
+        await Usuario.createIndexes(); // Asegura que los índices definidos en el esquema se creen
+        console.log('Índices creados.');
+
+        // Realizar una consulta avanzada usando operadores
+        const usuariosActivos = await Usuario.find({ activo: true, edad: { $gte: 30 } });
+        console.log('Usuarios activos mayores o iguales a 30 años:', usuariosActivos);
+
+    } catch (error) {
+        console.error('Error en las operaciones:', error);
+    } finally {
+        // Cerrar la conexión a MongoDB
+        mongoose.connection.close();
+        console.log('Conexión a MongoDB cerrada.');
+    }
+}
+
+// Ejecutar la función principal
+main();
+```
+
+#### Definición y uso de esquemas y modelos con Mongoose
+
+#### Esquema de usuario
+
+```javascript
+const mongoose = require('mongoose');
+
+const usuarioSchema = new mongoose.Schema({
+  nombre: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  correo: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    validate: {
+      validator: function(v) {
+        return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v);
+      },
+      message: props => `${props.value} no es un correo válido!`
+    },
+  },
+  edad: {
+    type: Number,
+    min: 0,
+    max: 120,
+  },
+  fechaRegistro: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+module.exports = usuarioSchema;
+```
+
+#### Modelo de usuario
+
+```javascript
+const mongoose = require('mongoose');
+const usuarioSchema = require('./usuarioSchema'); // Ruta al esquema definido anteriormente
+
+const Usuario = mongoose.model('Usuario', usuarioSchema);
+
+module.exports = Usuario;
+```
+
+#### Middleware para Hash de contraseña
+
+```javascript
+const bcrypt = require('bcrypt');
+
+usuarioSchema.pre('save', async function(next) {
+  const usuario = this;
+  if (usuario.isModified('password')) {
+    const salt = await bcrypt.genSalt(10);
+    usuario.password = await bcrypt.hash(usuario.password, salt);
+  }
+  next();
+});
+```
+
+#### Operaciones CRUD con Mongoose
+
+#### Crear un usuario
+
+```javascript
+const Usuario = require('./models/Usuario'); // Ruta al modelo de usuario
+
+async function crearUsuario() {
+  try {
+    const nuevoUsuario = new Usuario({
+      nombre: 'Juan Pérez',
+      correo: 'juan.perez@example.com',
+      edad: 30,
+    });
+
+    const resultado = await nuevoUsuario.save();
+    console.log('Usuario creado:', resultado);
+  } catch (error) {
+    console.error('Error al crear usuario:', error);
+  }
+}
+
+crearUsuario();
+```
+
+##### Encontrar un usuario por correo
+
+```javascript
+async function encontrarUsuarioPorCorreo(correo) {
+  try {
+    const usuario = await Usuario.findOne({ correo: correo });
+    if (usuario) {
+      console.log('Usuario encontrado:', usuario);
+    } else {
+      console.log('No se encontró un usuario con ese correo.');
+    }
+  } catch (error) {
+    console.error('Error al encontrar usuario:', error);
+  }
+}
+
+encontrarUsuarioPorCorreo('juan.perez@example.com');
+```
+
+#### Obtener todos los usuarios
+
+```javascript
+async function obtenerTodosLosUsuarios() {
+  try {
+    const usuarios = await Usuario.find();
+    console.log('Lista de usuarios:', usuarios);
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+  }
+}
+
+obtenerTodosLosUsuarios();
+```
+
+#### Actualizar la edad de un usuario
+
+```javascript
+async function actualizarEdadUsuario(correo, nuevaEdad) {
+  try {
+    const usuarioActualizado = await Usuario.findOneAndUpdate(
+      { correo: correo }, 
+      { edad: nuevaEdad },
+      { new: true, runValidators: true }
+    );
+    if (usuarioActualizado) {
+      console.log('Usuario actualizado:', usuarioActualizado);
+    } else {
+      console.log('No se encontró un usuario con ese correo.');
+    }
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error);
+  }
+}
+
+actualizarEdadUsuario('juan.perez@example.com', 31);
+```
+
+#### Eliminar un usuario por correo
+
+```javascript
+async function eliminarUsuarioPorCorreo(correo) {
+  try {
+    const resultado = await Usuario.deleteOne({ correo: correo });
+    if (resultado.deletedCount > 0) {
+      console.log('Usuario eliminado exitosamente.');
+    } else {
+      console.log('No se encontró un usuario con ese correo.');
+    }
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+  }
+}
+
+eliminarUsuarioPorCorreo('juan.perez@example.com');
+```
+
+#### Flujo completo de operaciones CRUD
+
+```javascript
+async function flujoCompletoUsuarios() {
+  try {
+    // Crear un nuevo usuario
+    const nuevoUsuario = new Usuario({
+      nombre: 'Ana Gómez',
+      correo: 'ana.gomez@example.com',
+      edad: 25,
+    });
+    const usuarioCreado = await nuevoUsuario.save();
+    console.log('Usuario creado:', usuarioCreado);
+
+    // Leer el usuario creado
+    const usuarioLeido = await Usuario.findOne({ correo: 'ana.gomez@example.com' });
+    console.log('Usuario leído:', usuarioLeido);
+
+    // Actualizar la edad del usuario
+    const usuarioActualizado = await Usuario.findOneAndUpdate(
+      { correo: 'ana.gomez@example.com' },
+      { edad: 26 },
+      { new: true, runValidators: true }
+    );
+    console.log('Usuario actualizado:', usuarioActualizado);
+
+    // Eliminar el usuario
+    const resultadoEliminacion = await Usuario.deleteOne({ correo: 'ana.gomez@example.com' });
+    if (resultadoEliminacion.deletedCount > 0) {
+      console.log('Usuario eliminado exitosamente.');
+    } else {
+      console.log('No se encontró un usuario para eliminar.');
+    }
+  } catch (error) {
+    console.error('Error en el flujo completo:', error);
+  }
+}
+
+flujoCompletoUsuarios();
+```
+
+#### Ejemplo completo de flujo de trabajo con Mongoose
+
+```javascript
+// flujoCompletoMongoose.js
+
+const mongoose = require('mongoose');
+const Usuario = require('./models/Usuario'); // Asegúrate de la ruta correcta
+const Publicacion = require('./models/Publicacion'); // Define este modelo similar al de Usuario
+
+async function main() {
+  try {
+    // Conectar a MongoDB usando Mongoose
+    const mongoURL = 'mongodb://localhost:27017/miBaseDeDatos';
+    const opciones = {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    };
+
+    await mongoose.connect(mongoURL, opciones);
+    console.log('Conectado correctamente a MongoDB con Mongoose');
+
+    // Limpiar las colecciones existentes
+    await Usuario.deleteMany({});
+    await Publicacion.deleteMany({});
+
+    // Crear nuevos usuarios
+    const usuario1 = new Usuario({
+      nombre: 'Juan Pérez',
+      correo: 'juan.perez@example.com',
+      edad: 28,
+      direccion: {
+        calle: 'Calle Falsa 123',
+        ciudad: 'Madrid',
+        codigoPostal: '28001'
+      },
+      hobbies: ['fútbol', 'lectura']
+    });
+
+    const usuario2 = new Usuario({
+      nombre: 'Ana Gómez',
+      correo: 'ana.gomez@example.com',
+      edad: 34,
+      direccion: {
+        calle: 'Avenida Siempre Viva 456',
+        ciudad: 'Barcelona',
+        codigoPostal: '08002'
+      },
+      hobbies: ['cine', 'viajes']
+    });
+
+    // Guardar usuarios en la base de datos
+    await usuario1.save();
+    await usuario2.save();
+    console.log('Usuarios creados y guardados.');
+
+    // Crear publicaciones relacionadas con usuarios
+    const publicacion1 = new Publicacion({
+      titulo: 'Mi primer post',
+      contenido: 'Este es el contenido de mi primer post.',
+      autor: usuario1._id
+    });
+
+    const publicacion2 = new Publicacion({
+      titulo: 'Aventuras en Barcelona',
+      contenido: 'Compartiendo mis experiencias en Barcelona.',
+      autor: usuario2._id
+    });
+
+    // Guardar publicaciones
+    await publicacion1.save();
+    await publicacion2.save();
+    console.log('Publicaciones creadas y guardadas.');
+
+    // Buscar un usuario y usar un método de instancia
+    const encontrado = await Usuario.findOne({ correo: 'juan.perez@example.com' });
+    console.log(encontrado.saludar()); // Salida: Hola, mi nombre es JUAN PÉREZ
+
+    // Usar un método estático para buscar usuarios por ciudad
+    const usuariosMadrid = await Usuario.buscarPorCiudad('Madrid');
+    console.log('Usuarios en Madrid:', usuariosMadrid);
+
+    // Población: Obtener publicaciones con detalles del autor
+    const publicacionesConAutores = await Publicacion.find().populate('autor', 'nombre email');
+    console.log('Publicaciones con detalles del autor:', publicacionesConAutores);
+
+    // Actualizar un usuario
+    encontrado.edad = 29;
+    await encontrado.save();
+    console.log('Edad actualizada:', encontrado.edad);
+
+    // Utilizar el virtual 'edadEnMeses'
+    console.log(`Edad de ${encontrado.nombre} en meses:`, encontrado.edadEnMeses);
+
+    // Eliminar un usuario y observar el middleware post 'remove'
+    await encontrado.remove();
+
+    // Crear índices
+    await Usuario.createIndexes(); // Asegura que los índices definidos en el esquema se creen
+    console.log('Índices creados.');
+
+    // Realizar una consulta avanzada usando operadores
+    const usuariosActivos = await Usuario.find({ activo: true, edad: { $gte: 30 } });
+    console.log('Usuarios activos mayores o iguales a 30 años:', usuariosActivos);
+
+  } catch (error) {
+    console.error('Error en las operaciones:', error);
+  } finally {
+    // Cerrar la conexión a MongoDB
+    mongoose.connection.close();
+    console.log('Conexión a MongoDB cerrada.');
+  }
+}
+
+// Ejecutar la función principal
+main();
+```
+
+#### Definición del modelo de publicación
+
+```javascript
+// models/Publicacion.js
+
+const mongoose = require('mongoose');
+
+const publicacionSchema = new mongoose.Schema({
+  titulo: {
+    type: String,
+    required: true
+  },
+  contenido: String,
+  autor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Usuario',
+    required: true
+  },
+  fechaPublicacion: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+const Publicacion = mongoose.model('Publicacion', publicacionSchema);
+
+module.exports = Publicacion;
+```
+
+
+#### Configuración y uso de Mongoose en una aplicación Node.js
+
+```bash
+mkdir mongoose_mongodb_ejemplo
+cd mongoose_mongodb_ejemplo
+npm init -y
+npm install mongoose
+```
+
+```javascript
 // Importar Mongoose
 const mongoose = require('mongoose');
 
@@ -885,7 +1502,7 @@ async function main() {
         console.log('Publicaciones creadas y guardadas.');
 
         // Buscar un usuario y usar un método de instancia
-        const encontrado = await Usuario.findOne({ email: 'juan.perez@example.com' });
+        const encontrado = await Usuario.findOne({ correo: 'juan.perez@example.com' });
         console.log(encontrado.saludar()); // Salida: Hola, mi nombre es JUAN PÉREZ
 
         // Usar un método estático para buscar usuarios por ciudad
@@ -926,4 +1543,823 @@ async function main() {
 
 // Ejecutar la función principal
 main();
+```
 
+
+#### Definición y uso de modelos y esquemas avanzados con Mongoose
+
+#### Definición del esquema de usuario avanzado
+
+```javascript
+const mongoose = require('mongoose');
+
+const usuarioSchema = new mongoose.Schema({
+  nombre: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  correo: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    validate: {
+      validator: function(v) {
+        return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v);
+      },
+      message: props => `${props.value} no es un correo válido!`
+    },
+  },
+  edad: {
+    type: Number,
+    min: 0,
+    max: 120,
+  },
+  fechaRegistro: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+module.exports = usuarioSchema;
+```
+
+#### Modelo de usuario
+
+```javascript
+const mongoose = require('mongoose');
+const usuarioSchema = require('./usuarioSchema'); // Ruta al esquema definido anteriormente
+
+const Usuario = mongoose.model('Usuario', usuarioSchema);
+
+module.exports = Usuario;
+```
+
+#### Middleware para Hash de contraseña
+
+```javascript
+const bcrypt = require('bcrypt');
+
+usuarioSchema.pre('save', async function(next) {
+  const usuario = this;
+  if (usuario.isModified('password')) {
+    const salt = await bcrypt.genSalt(10);
+    usuario.password = await bcrypt.hash(usuario.password, salt);
+  }
+  next();
+});
+```
+
+#### Operaciones CRUD con Mongoose
+
+#### Crear un usuario
+
+```javascript
+const Usuario = require('./models/Usuario'); // Ruta al modelo de usuario
+
+async function crearUsuario() {
+  try {
+    const nuevoUsuario = new Usuario({
+      nombre: 'Juan Pérez',
+      correo: 'juan.perez@example.com',
+      edad: 30,
+    });
+
+    const resultado = await nuevoUsuario.save();
+    console.log('Usuario creado:', resultado);
+  } catch (error) {
+    console.error('Error al crear usuario:', error);
+  }
+}
+
+crearUsuario();
+```
+
+#### Encontrar un usuario por correo
+
+```javascript
+async function encontrarUsuarioPorCorreo(correo) {
+  try {
+    const usuario = await Usuario.findOne({ correo: correo });
+    if (usuario) {
+      console.log('Usuario encontrado:', usuario);
+    } else {
+      console.log('No se encontró un usuario con ese correo.');
+    }
+  } catch (error) {
+    console.error('Error al encontrar usuario:', error);
+  }
+}
+
+encontrarUsuarioPorCorreo('juan.perez@example.com');
+```
+
+#### Obtener todos los usuarios
+
+```javascript
+async function obtenerTodosLosUsuarios() {
+  try {
+    const usuarios = await Usuario.find();
+    console.log('Lista de usuarios:', usuarios);
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+  }
+}
+
+obtenerTodosLosUsuarios();
+```
+
+#### Actualizar la edad de un usuario
+
+```javascript
+async function actualizarEdadUsuario(correo, nuevaEdad) {
+  try {
+    const usuarioActualizado = await Usuario.findOneAndUpdate(
+      { correo: correo }, 
+      { edad: nuevaEdad },
+      { new: true, runValidators: true }
+    );
+    if (usuarioActualizado) {
+      console.log('Usuario actualizado:', usuarioActualizado);
+    } else {
+      console.log('No se encontró un usuario con ese correo.');
+    }
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error);
+  }
+}
+
+actualizarEdadUsuario('juan.perez@example.com', 31);
+```
+
+#### Eliminar un usuario por correo
+
+```javascript
+async function eliminarUsuarioPorCorreo(correo) {
+  try {
+    const resultado = await Usuario.deleteOne({ correo: correo });
+    if (resultado.deletedCount > 0) {
+      console.log('Usuario eliminado exitosamente.');
+    } else {
+      console.log('No se encontró un usuario con ese correo.');
+    }
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+  }
+}
+
+eliminarUsuarioPorCorreo('juan.perez@example.com');
+```
+
+#### Flujo completo de operaciones CRUD
+
+```javascript
+async function flujoCompletoUsuarios() {
+  try {
+    // Crear un nuevo usuario
+    const nuevoUsuario = new Usuario({
+      nombre: 'Ana Gómez',
+      correo: 'ana.gomez@example.com',
+      edad: 25,
+    });
+    const usuarioCreado = await nuevoUsuario.save();
+    console.log('Usuario creado:', usuarioCreado);
+
+    // Leer el usuario creado
+    const usuarioLeido = await Usuario.findOne({ correo: 'ana.gomez@example.com' });
+    console.log('Usuario leído:', usuarioLeido);
+
+    // Actualizar la edad del usuario
+    const usuarioActualizado = await Usuario.findOneAndUpdate(
+      { correo: 'ana.gomez@example.com' },
+      { edad: 26 },
+      { new: true, runValidators: true }
+    );
+    console.log('Usuario actualizado:', usuarioActualizado);
+
+    // Eliminar el usuario
+    const resultadoEliminacion = await Usuario.deleteOne({ correo: 'ana.gomez@example.com' });
+    if (resultadoEliminacion.deletedCount > 0) {
+      console.log('Usuario eliminado exitosamente.');
+    } else {
+      console.log('No se encontró un usuario para eliminar.');
+    }
+  } catch (error) {
+    console.error('Error en el flujo completo:', error);
+  }
+}
+
+flujoCompletoUsuarios();
+```
+
+#### Configuración de Mongoose y definición de esquemas
+
+```bash
+mkdir mongoose_mongodb_ejemplo
+cd mongoose_mongodb_ejemplo
+npm init -y
+npm install mongoose
+```
+
+```javascript
+// Importar Mongoose
+const mongoose = require('mongoose');
+
+// URL de conexión a MongoDB (puede ser local o en la nube)
+const mongoURL = 'mongodb://localhost:27017/miBaseDeDatos';
+
+// Opciones de conexión
+const opciones = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    // useCreateIndex: true, // Obsoleto en versiones recientes
+    // useFindAndModify: false // Obsoleto en versiones recientes
+};
+
+// Conectar a MongoDB usando Mongoose
+mongoose.connect(mongoURL, opciones)
+    .then(() => console.log('Conectado correctamente a MongoDB con Mongoose'))
+    .catch(err => console.error('Error al conectar a MongoDB:', err));
+
+// Definir un esquema de usuario
+const usuarioSchema = new mongoose.Schema({
+    nombre: {
+        type: String,
+        required: [true, 'El nombre es obligatorio'],
+        trim: true,
+        minlength: [3, 'El nombre debe tener al menos 3 caracteres'],
+        maxlength: [50, 'El nombre no puede exceder los 50 caracteres']
+    },
+    email: {
+        type: String,
+        required: [true, 'El correo electrónico es obligatorio'],
+        unique: true,
+        lowercase: true,
+        trim: true,
+        match: [/\S+@\S+\.\S+/, 'Por favor, ingresa un correo electrónico válido']
+    },
+    edad: {
+        type: Number,
+        min: [0, 'La edad no puede ser negativa'],
+        max: [120, 'La edad no puede exceder los 120 años']
+    },
+    fechaRegistro: {
+        type: Date,
+        default: Date.now
+    },
+    direccion: {
+        calle: { type: String, required: true },
+        ciudad: { type: String, required: true },
+        codigoPostal: { type: String, required: true }
+    },
+    hobbies: [String],
+    activo: {
+        type: Boolean,
+        default: true
+    }
+}, {
+    // Opciones de esquema
+    timestamps: true, // Agrega createdAt y updatedAt
+    versionKey: false // Elimina el campo __v
+});
+
+// Virtual: Calcular la edad en meses
+usuarioSchema.virtual('edadEnMeses').get(function () {
+    return this.edad * 12;
+});
+
+// Método de instancia: Saludar
+usuarioSchema.methods.saludar = function () {
+    return `Hola, mi nombre es ${this.nombre}`;
+};
+
+// Método estático: Buscar por ciudad
+usuarioSchema.statics.buscarPorCiudad = function (ciudad) {
+    return this.find({ 'direccion.ciudad': ciudad });
+};
+
+// Middleware: Antes de guardar, convertir el nombre a mayúsculas
+usuarioSchema.pre('save', function (next) {
+    this.nombre = this.nombre.toUpperCase();
+    next();
+});
+
+// Middleware: Después de eliminar, loguear la eliminación
+usuarioSchema.post('remove', function (doc) {
+    console.log(`El usuario con ID ${doc._id} ha sido eliminado.`);
+});
+
+// Crear el modelo de Usuario
+const Usuario = mongoose.model('Usuario', usuarioSchema);
+
+// Definir un esquema de publicación (para demostración de población)
+const publicacionSchema = new mongoose.Schema({
+    titulo: {
+        type: String,
+        required: true
+    },
+    contenido: String,
+    autor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: true
+    },
+    fechaPublicacion: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+// Crear el modelo de Publicación
+const Publicacion = mongoose.model('Publicacion', publicacionSchema);
+
+// Función principal para ejecutar operaciones
+async function main() {
+    try {
+        // Limpiar las colecciones existentes
+        await Usuario.deleteMany({});
+        await Publicacion.deleteMany({});
+
+        // Crear nuevos usuarios
+        const usuario1 = new Usuario({
+            nombre: 'Juan Pérez',
+            correo: 'juan.perez@example.com',
+            edad: 28,
+            direccion: {
+                calle: 'Calle Falsa 123',
+                ciudad: 'Madrid',
+                codigoPostal: '28001'
+            },
+            hobbies: ['fútbol', 'lectura']
+        });
+
+        const usuario2 = new Usuario({
+            nombre: 'Ana Gómez',
+            correo: 'ana.gomez@example.com',
+            edad: 34,
+            direccion: {
+                calle: 'Avenida Siempre Viva 456',
+                ciudad: 'Barcelona',
+                codigoPostal: '08002'
+            },
+            hobbies: ['cine', 'viajes']
+        });
+
+        // Guardar usuarios en la base de datos
+        await usuario1.save();
+        await usuario2.save();
+        console.log('Usuarios creados y guardados.');
+
+        // Crear publicaciones relacionadas con usuarios
+        const publicacion1 = new Publicacion({
+            titulo: 'Mi primer post',
+            contenido: 'Este es el contenido de mi primer post.',
+            autor: usuario1._id
+        });
+
+        const publicacion2 = new Publicacion({
+            titulo: 'Aventuras en Barcelona',
+            contenido: 'Compartiendo mis experiencias en Barcelona.',
+            autor: usuario2._id
+        });
+
+        // Guardar publicaciones
+        await publicacion1.save();
+        await publicacion2.save();
+        console.log('Publicaciones creadas y guardadas.');
+
+        // Buscar un usuario y usar un método de instancia
+        const encontrado = await Usuario.findOne({ correo: 'juan.perez@example.com' });
+        console.log(encontrado.saludar()); // Salida: Hola, mi nombre es JUAN PÉREZ
+
+        // Usar un método estático para buscar usuarios por ciudad
+        const usuariosMadrid = await Usuario.buscarPorCiudad('Madrid');
+        console.log('Usuarios en Madrid:', usuariosMadrid);
+
+        // Población: Obtener publicaciones con detalles del autor
+        const publicacionesConAutores = await Publicacion.find().populate('autor', 'nombre email');
+        console.log('Publicaciones con detalles del autor:', publicacionesConAutores);
+
+        // Actualizar un usuario
+        encontrado.edad = 29;
+        await encontrado.save();
+        console.log('Edad actualizada:', encontrado.edad);
+
+        // Utilizar el virtual 'edadEnMeses'
+        console.log(`Edad de ${encontrado.nombre} en meses:`, encontrado.edadEnMeses);
+
+        // Eliminar un usuario y observar el middleware post 'remove'
+        await encontrado.remove();
+
+        // Crear índices
+        await Usuario.createIndexes(); // Asegura que los índices definidos en el esquema se creen
+        console.log('Índices creados.');
+
+        // Realizar una consulta avanzada usando operadores
+        const usuariosActivos = await Usuario.find({ activo: true, edad: { $gte: 30 } });
+        console.log('Usuarios activos mayores o iguales a 30 años:', usuariosActivos);
+
+    } catch (error) {
+        console.error('Error en las operaciones:', error);
+    } finally {
+        // Cerrar la conexión a MongoDB
+        mongoose.connection.close();
+        console.log('Conexión a MongoDB cerrada.');
+    }
+}
+
+// Ejecutar la función principal
+main();
+```
+
+#### Definición y uso de modelos y esquemas adicionales
+
+#### Modelo de publicación
+
+```javascript
+// models/Publicacion.js
+
+const mongoose = require('mongoose');
+
+const publicacionSchema = new mongoose.Schema({
+    titulo: {
+        type: String,
+        required: true
+    },
+    contenido: String,
+    autor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: true
+    },
+    fechaPublicacion: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+const Publicacion = mongoose.model('Publicacion', publicacionSchema);
+
+module.exports = Publicacion;
+```
+
+#### Crear y utilizar el modelo de usuario con Mongoose
+
+#### Crear un usuario
+
+```javascript
+const Usuario = require('./models/Usuario'); // Ruta al modelo de usuario
+
+async function crearUsuario() {
+  try {
+    const nuevoUsuario = new Usuario({
+      nombre: 'Juan Pérez',
+      correo: 'juan.perez@example.com',
+      edad: 30,
+    });
+
+    const resultado = await nuevoUsuario.save();
+    console.log('Usuario creado:', resultado);
+  } catch (error) {
+    console.error('Error al crear usuario:', error);
+  }
+}
+
+crearUsuario();
+```
+
+#### Leer usuarios
+
+```javascript
+async function encontrarUsuarioPorCorreo(correo) {
+  try {
+    const usuario = await Usuario.findOne({ correo: correo });
+    if (usuario) {
+      console.log('Usuario encontrado:', usuario);
+    } else {
+      console.log('No se encontró un usuario con ese correo.');
+    }
+  } catch (error) {
+    console.error('Error al encontrar usuario:', error);
+  }
+}
+
+encontrarUsuarioPorCorreo('juan.perez@example.com');
+
+async function obtenerTodosLosUsuarios() {
+  try {
+    const usuarios = await Usuario.find();
+    console.log('Lista de usuarios:', usuarios);
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+  }
+}
+
+obtenerTodosLosUsuarios();
+```
+
+#### Actualizar un usuario
+
+```javascript
+async function actualizarEdadUsuario(correo, nuevaEdad) {
+  try {
+    const usuarioActualizado = await Usuario.findOneAndUpdate(
+      { correo: correo }, 
+      { edad: nuevaEdad },
+      { new: true, runValidators: true }
+    );
+    if (usuarioActualizado) {
+      console.log('Usuario actualizado:', usuarioActualizado);
+    } else {
+      console.log('No se encontró un usuario con ese correo.');
+    }
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error);
+  }
+}
+
+actualizarEdadUsuario('juan.perez@example.com', 31);
+```
+
+#### Eliminar un usuario
+
+```javascript
+async function eliminarUsuarioPorCorreo(correo) {
+  try {
+    const resultado = await Usuario.deleteOne({ correo: correo });
+    if (resultado.deletedCount > 0) {
+      console.log('Usuario eliminado exitosamente.');
+    } else {
+      console.log('No se encontró un usuario con ese correo.');
+    }
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+  }
+}
+
+eliminarUsuarioPorCorreo('juan.perez@example.com');
+```
+
+#### Flujo completo de operaciones CRUD
+
+```javascript
+async function flujoCompletoUsuarios() {
+  try {
+    // Crear un nuevo usuario
+    const nuevoUsuario = new Usuario({
+      nombre: 'Ana Gómez',
+      correo: 'ana.gomez@example.com',
+      edad: 25,
+    });
+    const usuarioCreado = await nuevoUsuario.save();
+    console.log('Usuario creado:', usuarioCreado);
+
+    // Leer el usuario creado
+    const usuarioLeido = await Usuario.findOne({ correo: 'ana.gomez@example.com' });
+    console.log('Usuario leído:', usuarioLeido);
+
+    // Actualizar la edad del usuario
+    const usuarioActualizado = await Usuario.findOneAndUpdate(
+      { correo: 'ana.gomez@example.com' },
+      { edad: 26 },
+      { new: true, runValidators: true }
+    );
+    console.log('Usuario actualizado:', usuarioActualizado);
+
+    // Eliminar el usuario
+    const resultadoEliminacion = await Usuario.deleteOne({ correo: 'ana.gomez@example.com' });
+    if (resultadoEliminacion.deletedCount > 0) {
+      console.log('Usuario eliminado exitosamente.');
+    } else {
+      console.log('No se encontró un usuario para eliminar.');
+    }
+  } catch (error) {
+    console.error('Error en el flujo completo:', error);
+  }
+}
+
+flujoCompletoUsuarios();
+```
+
+#### Configuración inicial del proyecto Mongoose con MongoDB
+
+```bash
+mkdir mongoose_mongodb_ejemplo
+cd mongoose_mongodb_ejemplo
+npm init -y
+npm install mongoose
+```
+
+#### Código de configuración
+
+```javascript
+// Importar Mongoose
+const mongoose = require('mongoose');
+
+// URL de conexión a MongoDB (puede ser local o en la nube)
+const mongoURL = 'mongodb://localhost:27017/miBaseDeDatos';
+
+// Opciones de conexión
+const opciones = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    // useCreateIndex: true, // Obsoleto en versiones recientes
+    // useFindAndModify: false // Obsoleto en versiones recientes
+};
+
+// Conectar a MongoDB usando Mongoose
+mongoose.connect(mongoURL, opciones)
+    .then(() => console.log('Conectado correctamente a MongoDB con Mongoose'))
+    .catch(err => console.error('Error al conectar a MongoDB:', err));
+
+// Definir un esquema de usuario
+const usuarioSchema = new mongoose.Schema({
+    nombre: {
+        type: String,
+        required: [true, 'El nombre es obligatorio'],
+        trim: true,
+        minlength: [3, 'El nombre debe tener al menos 3 caracteres'],
+        maxlength: [50, 'El nombre no puede exceder los 50 caracteres']
+    },
+    email: {
+        type: String,
+        required: [true, 'El correo electrónico es obligatorio'],
+        unique: true,
+        lowercase: true,
+        trim: true,
+        match: [/\S+@\S+\.\S+/, 'Por favor, ingresa un correo electrónico válido']
+    },
+    edad: {
+        type: Number,
+        min: [0, 'La edad no puede ser negativa'],
+        max: [120, 'La edad no puede exceder los 120 años']
+    },
+    fechaRegistro: {
+        type: Date,
+        default: Date.now
+    },
+    direccion: {
+        calle: { type: String, required: true },
+        ciudad: { type: String, required: true },
+        codigoPostal: { type: String, required: true }
+    },
+    hobbies: [String],
+    activo: {
+        type: Boolean,
+        default: true
+    }
+}, {
+    // Opciones de esquema
+    timestamps: true, // Agrega createdAt y updatedAt
+    versionKey: false // Elimina el campo __v
+});
+
+// Virtual: Calcular la edad en meses
+usuarioSchema.virtual('edadEnMeses').get(function () {
+    return this.edad * 12;
+});
+
+// Método de instancia: Saludar
+usuarioSchema.methods.saludar = function () {
+    return `Hola, mi nombre es ${this.nombre}`;
+};
+
+// Método estático: Buscar por ciudad
+usuarioSchema.statics.buscarPorCiudad = function (ciudad) {
+    return this.find({ 'direccion.ciudad': ciudad });
+};
+
+// Middleware: Antes de guardar, convertir el nombre a mayúsculas
+usuarioSchema.pre('save', function (next) {
+    this.nombre = this.nombre.toUpperCase();
+    next();
+});
+
+// Middleware: Después de eliminar, loguear la eliminación
+usuarioSchema.post('remove', function (doc) {
+    console.log(`El usuario con ID ${doc._id} ha sido eliminado.`);
+});
+
+// Crear el modelo de Usuario
+const Usuario = mongoose.model('Usuario', usuarioSchema);
+
+// Definir un esquema de publicación (para demostración de población)
+const publicacionSchema = new mongoose.Schema({
+    titulo: {
+        type: String,
+        required: true
+    },
+    contenido: String,
+    autor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: true
+    },
+    fechaPublicacion: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+// Crear el modelo de Publicación
+const Publicacion = mongoose.model('Publicacion', publicacionSchema);
+
+// Función principal para ejecutar operaciones
+async function main() {
+    try {
+        // Limpiar las colecciones existentes
+        await Usuario.deleteMany({});
+        await Publicacion.deleteMany({});
+
+        // Crear nuevos usuarios
+        const usuario1 = new Usuario({
+            nombre: 'Juan Pérez',
+            email: 'juan.perez@example.com',
+            edad: 28,
+            direccion: {
+                calle: 'Calle Falsa 123',
+                ciudad: 'Madrid',
+                codigoPostal: '28001'
+            },
+            hobbies: ['fútbol', 'lectura']
+        });
+
+        const usuario2 = new Usuario({
+            nombre: 'Ana Gómez',
+            email: 'ana.gomez@example.com',
+            edad: 34,
+            direccion: {
+                calle: 'Avenida Siempre Viva 456',
+                ciudad: 'Barcelona',
+                codigoPostal: '08002'
+            },
+            hobbies: ['cine', 'viajes']
+        });
+
+        // Guardar usuarios en la base de datos
+        await usuario1.save();
+        await usuario2.save();
+        console.log('Usuarios creados y guardados.');
+
+        // Crear publicaciones relacionadas con usuarios
+        const publicacion1 = new Publicacion({
+            titulo: 'Mi primer post',
+            contenido: 'Este es el contenido de mi primer post.',
+            autor: usuario1._id
+        });
+
+        const publicacion2 = new Publicacion({
+            titulo: 'Aventuras en Barcelona',
+            contenido: 'Compartiendo mis experiencias en Barcelona.',
+            autor: usuario2._id
+        });
+
+        // Guardar publicaciones
+        await publicacion1.save();
+        await publicacion2.save();
+        console.log('Publicaciones creadas y guardadas.');
+
+        // Buscar un usuario y usar un método de instancia
+        const encontrado = await Usuario.findOne({ correo: 'juan.perez@example.com' });
+        console.log(encontrado.saludar()); // Salida: Hola, mi nombre es JUAN PÉREZ
+
+        // Usar un método estático para buscar usuarios por ciudad
+        const usuariosMadrid = await Usuario.buscarPorCiudad('Madrid');
+        console.log('Usuarios en Madrid:', usuariosMadrid);
+
+        // Población: Obtener publicaciones con detalles del autor
+        const publicacionesConAutores = await Publicacion.find().populate('autor', 'nombre email');
+        console.log('Publicaciones con detalles del autor:', publicacionesConAutores);
+
+        // Actualizar un usuario
+        encontrado.edad = 29;
+        await encontrado.save();
+        console.log('Edad actualizada:', encontrado.edad);
+
+        // Utilizar el virtual 'edadEnMeses'
+        console.log(`Edad de ${encontrado.nombre} en meses:`, encontrado.edadEnMeses);
+
+        // Eliminar un usuario y observar el middleware post 'remove'
+        await encontrado.remove();
+
+        // Crear índices
+        await Usuario.createIndexes(); // Asegura que los índices definidos en el esquema se creen
+        console.log('Índices creados.');
+
+        // Realizar una consulta avanzada usando operadores
+        const usuariosActivos = await Usuario.find({ activo: true, edad: { $gte: 30 } });
+        console.log('Usuarios activos mayores o iguales a 30 años:', usuariosActivos);
+
+    } catch (error) {
+        console.error('Error en las operaciones:', error);
+    } finally {
+        // Cerrar la conexión a MongoDB
+        mongoose.connection.close();
+        console.log('Conexión a MongoDB cerrada.');
+    }
+}
+
+// Ejecutar la función principal
+main();
+```
