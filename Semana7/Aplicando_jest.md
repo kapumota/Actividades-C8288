@@ -19,8 +19,6 @@ También exploraremos cómo utilizar **mocks**, **stubs** y **fakes** para simul
 5. [Pruebas de integración](#pruebas-de-integración)
    - 5.1 [Probando rutas de Next.js](#probando-rutas-de-nextjs)
 6. [Ejecutando las pruebas](#ejecutando-las-pruebas)
-7. [Conclusiones](#conclusiones)
-
 
 
 #### Introducción a Jest
@@ -897,14 +895,13 @@ describe('Base de Datos Fake', () => {
 
 
 
-## Recursos Adicionales
+#### Recursos Adicionales
 
 - [Testing Library para React](https://testing-library.com/docs/react-testing-library/intro)
 - [Mocking Modules con Jest](https://jestjs.io/docs/manual-mocks)
 - [Pruebas de Integración con Next.js](https://nextjs.org/docs/testing#jest-and-react-testing-library)
 - [Patrones de Diseño para Pruebas](https://martinfowler.com/bliki/TestDouble.html)
 
----
 
 #### Anexos
 
@@ -1049,3 +1046,487 @@ export class FakeDatabase {
 export const database = new FakeDatabase();
 ```
 
+
+### Ejercicios
+
+**Jest** es un framework de pruebas de JavaScript mantenido por Facebook. Es ampliamente utilizado para probar aplicaciones React, Node.js y más. Proporciona un entorno sencillo para escribir y ejecutar pruebas, con características como mocks integrados, cobertura de código y una sintaxis amigable.
+
+
+### Instalación de Jest
+
+Primero, necesitas tener instalado Node.js y npm. Luego, crea un nuevo directorio para tu proyecto y ejecuta los siguientes comandos:
+
+```bash
+mkdir jest-tutorial
+cd jest-tutorial
+npm init -y
+```
+
+Esto inicializa un nuevo proyecto npm. Ahora, instala Jest:
+
+```bash
+npm install --save-dev jest
+```
+
+#### Configuración de Jest
+
+Agrega un script en tu `package.json` para ejecutar Jest:
+
+```json
+"scripts": {
+  "test": "jest"
+}
+```
+
+Crea una carpeta `src` para tu código fuente y una carpeta `__tests__` para tus pruebas:
+
+```bash
+mkdir src
+mkdir __tests__
+```
+
+
+#### Pruebas unitarias
+
+
+Las **pruebas unitarias** son pruebas que se enfocan en pequeñas unidades de código, como funciones individuales, para asegurarse de que funcionan correctamente.
+
+### Ejercicio práctico
+
+Vamos a escribir una función simple y su prueba unitaria.
+
+#### Paso 1: Escribir la Función
+
+**Archivo**: `src/calculator.js`
+
+```javascript
+function add(a, b) {
+  return a + b;
+}
+
+module.exports = { add };
+```
+
+#### Paso 2: Escribir la prueba unitaria
+
+**Archivo**: `__tests__/calculator.test.js`
+
+```javascript
+const { add } = require('../src/calculator');
+
+test('La función add debe sumar dos números correctamente', () => {
+  expect(add(2, 3)).toBe(5);
+  expect(add(-1, 1)).toBe(0);
+  expect(add(0, 0)).toBe(0);
+});
+```
+
+#### Paso 3: Ejecutar la prueba
+
+Ejecuta el siguiente comando:
+
+```bash
+npm test
+```
+
+Deberías ver que la prueba pasa exitosamente.
+
+
+#### Mocks en Jest
+
+#### Entendiendo los Mocks
+
+Los **mocks** son objetos o funciones simuladas que reemplazan el comportamiento de componentes reales para aislar el código bajo prueba.
+
+#### Ejercicio con Mocks
+
+Supongamos que tenemos una función que depende de una API externa.
+
+#### Paso 1: Escribir la función
+
+**Archivo**: `src/userService.js`
+
+```javascript
+const axios = require('axios');
+
+async function getUserData(userId) {
+  const response = await axios.get(`https://api.example.com/users/${userId}`);
+  return response.data;
+}
+
+module.exports = { getUserData };
+```
+
+#### Paso 2: Escribir la prueba con Mock
+
+Necesitamos evitar hacer una llamada real a la API externa.
+
+**Archivo**: `__tests__/userService.test.js`
+
+```javascript
+const { getUserData } = require('../src/userService');
+const axios = require('axios');
+
+jest.mock('axios');
+
+test('getUserData debe devolver los datos del usuario', async () => {
+  const userData = { id: 1, name: 'John Doe' };
+  axios.get.mockResolvedValue({ data: userData });
+
+  const data = await getUserData(1);
+  expect(data).toEqual(userData);
+  expect(axios.get).toHaveBeenCalledWith('https://api.example.com/users/1');
+});
+```
+
+#### Paso 3: Ejecutar la prueba
+
+```bash
+npm test
+```
+
+La prueba debería pasar, y hemos simulado la respuesta de la API externa.
+
+#### Stubs en Jest
+
+#### Diferencia entre Mocks y Stubs
+
+Un **stub** es una función que reemplaza una implementación, generalmente para evitar efectos secundarios. Los **mocks** pueden incluir expectativas sobre cómo se usan, mientras que los stubs simplemente devuelven valores predefinidos.
+
+#### Ejercicio con Stubs
+
+Supongamos que tenemos una función que escribe en una base de datos.
+
+#### Paso 1: Escribir la función
+
+**Archivo**: `src/dbService.js`
+
+```javascript
+function saveUser(user) {
+  // Simula guardar en una base de datos
+  console.log('Usuario guardado en la base de datos');
+}
+
+module.exports = { saveUser };
+```
+
+**Archivo**: `src/userController.js`
+
+```javascript
+const { saveUser } = require('./dbService');
+
+function registerUser(name) {
+  const user = { name };
+  saveUser(user);
+  return user;
+}
+
+module.exports = { registerUser };
+```
+
+#### Paso 2: Escribir la prueba con Stub
+
+Queremos probar `registerUser` sin realmente escribir en la base de datos.
+
+**Archivo**: `__tests__/userController.test.js`
+
+```javascript
+const { registerUser } = require('../src/userController');
+const dbService = require('../src/dbService');
+
+jest.spyOn(dbService, 'saveUser').mockImplementation(() => {
+  console.log('Stub: Usuario guardado');
+});
+
+test('registerUser debe crear un usuario', () => {
+  const user = registerUser('Kapumota');
+  expect(user).toEqual({ name: 'Kapumota' });
+  expect(dbService.saveUser).toHaveBeenCalledWith({ name: 'Kapumota' });
+});
+```
+
+#### Paso 3: Ejecutar la prueba
+
+```bash
+npm test
+```
+
+La prueba debería pasar, y hemos evitado el efecto secundario de escribir en la base de datos real.
+
+
+#### Pruebas de integración
+
+
+Las **pruebas de integración** verifican que diferentes componentes del sistema funcionen juntos correctamente.
+
+#### Ejercicio práctico
+
+Vamos a probar la integración entre dos módulos.
+
+#### Paso 1: Modificar `dbService.js` para retornar datos
+
+**Archivo**: `src/dbService.js`
+
+```javascript
+let database = [];
+
+function saveUser(user) {
+  database.push(user);
+}
+
+function getUser(name) {
+  return database.find((user) => user.name === name);
+}
+
+module.exports = { saveUser, getUser };
+```
+
+#### Paso 2: Modificar `userController.js` para incluir obtener usuario
+
+**Archivo**: `src/userController.js`
+
+```javascript
+const { saveUser, getUser } = require('./dbService');
+
+function registerUser(name) {
+  const user = { name };
+  saveUser(user);
+  return user;
+}
+
+function findUser(name) {
+  return getUser(name);
+}
+
+module.exports = { registerUser, findUser };
+```
+
+#### Paso 3: Escribir la prueba de integración
+
+**Archivo**: `__tests__/integration.test.js`
+
+```javascript
+const { registerUser, findUser } = require('../src/userController');
+
+test('Debe registrar y encontrar un usuario', () => {
+  registerUser('Alice');
+  const user = findUser('Alice');
+  expect(user).toEqual({ name: 'Alice' });
+});
+```
+
+#### Paso 4: Ejecutar la prueba
+
+```bash
+npm test
+```
+
+La prueba debería pasar, confirmando que `registerUser` y `findUser` funcionan correctamente juntos.
+
+
+
+#### Pruebas de extremo a extremo (End-to-End)
+
+#### Introducción a las pruebas E2E
+
+Las pruebas de **extremo a extremo** simulan el comportamiento del usuario y verifican que el sistema completo funcione correctamente. Herramientas como **Puppeteer** y **Cypress** son populares para este tipo de pruebas.
+
+#### Ejercicio con Puppeteer
+
+Vamos a utilizar Puppeteer para automatizar un navegador y probar una aplicación web simple.
+
+#### Paso 1: Crear una aplicación web simple
+
+Crea un archivo `index.html`:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prueba E2E</title>
+</head>
+<body>
+  <h1 id="greeting">Hola, Mundo!</h1>
+</body>
+</html>
+```
+
+Inicia un servidor local para servir este archivo. Puedes usar `serve`:
+
+```bash
+npm install --global serve
+serve .
+```
+
+Esto servirá el archivo en `http://localhost:5000` (o similar).
+
+#### Paso 2: Instalar Puppeteer
+
+```bash
+npm install --save-dev puppeteer
+```
+
+#### Paso 3: Escribir la prueba E2E
+
+**Archivo**: `__tests__/e2e.test.js`
+
+```javascript
+const puppeteer = require('puppeteer');
+
+jest.setTimeout(30000);
+
+describe('Prueba E2E con Puppeteer', () => {
+  let browser;
+  let page;
+
+  beforeAll(async () => {
+    browser = await puppeteer.launch();
+    page = await browser.newPage();
+  });
+
+  afterAll(() => {
+    browser.close();
+  });
+
+  test('Debe mostrar el saludo correcto', async () => {
+    await page.goto('http://localhost:5000');
+    const greeting = await page.$eval('#greeting', (el) => el.textContent);
+    expect(greeting).toBe('Hola, Mundo!');
+  });
+});
+```
+
+#### Paso 4: Ejecutar la prueba
+
+Asegúrate de que el servidor esté ejecutándose y luego:
+
+```bash
+npm test
+```
+
+La prueba debería pasar, verificando que el saludo se muestra correctamente.
+
+aplicaciones.
+
+
+#### Recursos adicionales
+
+- [Documentación Oficial de Jest](https://jestjs.io/)
+- [Jest Cheatsheet](https://devhints.io/jest)
+- [Testing JavaScript Applications](https://www.pluralsight.com/courses/testing-javascript-applications)
+- [Puppeteer Documentation](https://pptr.dev/)
+
+
+#### Apéndice: Ejercicios adicionales
+
+#### Ejercicio 1: Pruebas asíncronas
+
+**Objetivo**: Practicar pruebas unitarias con funciones asíncronas.
+
+#### Paso 1: Escribir una función asíncrona
+
+**Archivo**: `src/asyncFunction.js`
+
+```javascript
+function fetchData(callback) {
+  setTimeout(() => {
+    callback('Datos recibidos');
+  }, 1000);
+}
+
+module.exports = { fetchData };
+```
+
+#### Paso 2: Escribir la prueba
+
+**Archivo**: `__tests__/asyncFunction.test.js`
+
+```javascript
+const { fetchData } = require('../src/asyncFunction');
+
+test('fetchData devuelve los datos esperados', (done) => {
+  function callback(data) {
+    expect(data).toBe('Datos recibidos');
+    done();
+  }
+
+  fetchData(callback);
+});
+```
+
+#### Paso 3: Ejecutar la prueba
+
+```bash
+npm test
+```
+
+**Explicación**: Utilizamos `done` para indicar a Jest que la prueba es asíncrona y debe esperar a que se llame.
+
+#### Ejercicio 2: Pruebas con promesas
+
+#### Paso 1: Modificar la función para usar promesas
+
+**Archivo**: `src/asyncFunction.js`
+
+```javascript
+function fetchDataPromise() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve('Datos recibidos');
+    }, 1000);
+  });
+}
+
+module.exports = { fetchDataPromise };
+```
+
+#### Paso 2: Escribir la prueba con promesas
+
+**Archivo**: `__tests__/asyncFunction.test.js`
+
+```javascript
+const { fetchDataPromise } = require('../src/asyncFunction');
+
+test('fetchDataPromise devuelve los datos esperados', () => {
+  return fetchDataPromise().then((data) => {
+    expect(data).toBe('Datos recibidos');
+  });
+});
+```
+
+#### Paso 3: Ejecutar la prueba
+
+```bash
+npm test
+```
+
+**Explicación**: Al retornar la promesa, Jest espera a que se resuelva antes de finalizar la prueba.
+
+#### Ejercicio 3: Usando Async/Await en pruebas
+
+#### Paso 1: Escribir la prueba con Async/Await
+
+**Archivo**: `__tests__/asyncFunction.test.js`
+
+```javascript
+test('fetchDataPromise devuelve los datos esperados (async/await)', async () => {
+  const data = await fetchDataPromise();
+  expect(data).toBe('Datos recibidos');
+});
+```
+
+#### Paso 2: Ejecutar la prueba
+
+```bash
+npm test
+```
+
+
+#### Consejos para escribir buenas pruebas
+
+- **Nombrado claro**: Utiliza nombres descriptivos para tus pruebas y funciones.
+- **Una aserción por prueba**: Idealmente, cada prueba debe verificar una sola cosa.
+- **Aislamiento**: Las pruebas no deben depender del orden de ejecución ni modificar el estado compartido.
+- **Cobertura de código**: Utiliza la cobertura de código para identificar áreas no probadas.
+- **Evita mockear en exceso**: Si mocks demasiado, podrías no estar probando el comportamiento real.
+- **Documentación**: Comenta tus pruebas si el propósito no es evidente.
