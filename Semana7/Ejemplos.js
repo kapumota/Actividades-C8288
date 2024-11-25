@@ -1,6 +1,6 @@
 npm install express oauth2-server body-parser
 
-**Configuración del servidor con Express y OAuth 2.0**
+//Configuración del servidor con Express y OAuth 2.0
 
 // server.js
 const express = require('express');
@@ -45,7 +45,7 @@ app.listen(3000, () => {
     console.log('Servidor escuchando en el puerto 3000');
 });
 
-**Modelo de almacenamiento y validación**
+//Modelo de almacenamiento y validación
 const db = {
     clients: [
         {
@@ -95,7 +95,7 @@ module.exports = {
 };
 
 
-**Cliente OAuth 2.0 en el Frontend**
+//Cliente OAuth 2.0 en el Frontend
 
 async function obtenerToken() {
     const response = await fetch('http://localhost:3000/oauth/token', {
@@ -130,9 +130,9 @@ async function accederRutaProtegida() {
 
 accederRutaProtegida();
 
-**Algoritmos de cifrado utilizados en OAuth 2.0**
+//Algoritmos de cifrado utilizados en OAuth 2.0
 
-**Ejemplo en JavaScript con jsonwebtoken**
+//Ejemplo en JavaScript con jsonwebtoken
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 
@@ -159,7 +159,7 @@ console.log('JWT HS256:', tokenHS256);
 console.log('JWT RS256:', tokenRS256);
 
 
-**Ejemplo en JavaScript con jose**
+//Ejemplo en JavaScript con jose
 const { JWE, JWK } = require('jose');
 
 // Generar una clave pública y privada para cifrado
@@ -186,7 +186,7 @@ const decryptedPayload = JSON.parse(decrypted.toString());
 
 console.log('Decrypted Payload:', decryptedPayload);
 
-**Ejemplo en JavaScript con crypto**
+//Ejemplo en JavaScript con crypto
 const crypto = require('crypto');
 
 // Generar un code_verifier
@@ -273,7 +273,7 @@ try {
     console.error('Error verificando RS256:', err);
 }
 
-**TypeScript con jsonwebtoken**
+//TypeScript con jsonwebtoken
 
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
@@ -348,7 +348,7 @@ const decryptedPayload = JSON.parse(decrypted.toString());
 console.log('Decrypted Payload:', decryptedPayload);
 
 
-**Implementación de PKCE en un cliente OAuth 2.0**
+//Implementación de PKCE en un cliente OAuth 2.0
 
 const crypto = require('crypto');
 const fetch = require('node-fetch');
@@ -395,7 +395,7 @@ function generateCodeChallenge(codeVerifier) {
     console.log('Token Data:', tokenData);
 })();
 
-**Configuración de TLS en un servidor OAuth 2.0 JavaScript con Express y HTTPS**
+//Configuración de TLS en un servidor OAuth 2.0 JavaScript con Express y HTTPS
 
 const express = require('express');
 const https = require('https');
